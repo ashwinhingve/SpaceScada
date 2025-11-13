@@ -1,0 +1,35 @@
+{
+  "name": "@webscada/realtime-service",
+  "version": "1.0.0",
+  "description": "Real-time data service for WebSCADA with REST API and WebSocket support",
+  "main": "dist/index.js",
+  "scripts": {
+    "dev": "tsx watch src/index.ts",
+    "build": "tsc",
+    "start": "node dist/index.js",
+    "lint": "eslint src --ext .ts",
+    "type-check": "tsc --noEmit",
+    "clean": "rm -rf dist",
+    "test": "echo \"Tests not yet implemented\""
+  },
+  "dependencies": {
+    "@fastify/cors": "^8.5.0",
+    "@fastify/helmet": "^11.1.1",
+    "@fastify/rate-limit": "^9.1.0",
+    "@fastify/websocket": "^8.3.1",
+    "@webscada/shared-types": "workspace:*",
+    "@webscada/utils": "workspace:*",
+    "dotenv": "^16.3.1",
+    "fastify": "^4.25.2",
+    "joi": "^17.11.0",
+    "pino": "^8.17.2",
+    "pino-pretty": "^10.3.1",
+    "prom-client": "^15.1.0",
+    "socket.io": "^4.6.1"
+  },
+  "devDependencies": {
+    "@types/node": "^20.10.5",
+    "tsx": "^4.7.0",
+    "typescript": "^5.3.3"
+  }
+}

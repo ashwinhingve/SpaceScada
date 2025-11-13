@@ -1,0 +1,33 @@
+node_modules
+npm-debug.log
+.next
+dist
+.cache
+.vscode
+.idea
+
+# Git
+.git
+.gitignore
+
+# Environment
+.env
+.env*.local
+
+# Testing
+coverage
+*.log
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Build
+build
+out
+
+# Turbo
+.turbo
+
+# TypeScript
+*.tsbuildinfo
