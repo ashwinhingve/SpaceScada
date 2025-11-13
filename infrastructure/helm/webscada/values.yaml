@@ -1,0 +1,127 @@
+# Default values for webscada
+
+namespace: webscada
+
+# Frontend configuration
+frontend:
+  replicaCount: 2
+  image:
+    repository: webscada/frontend
+    tag: latest
+    pullPolicy: IfNotPresent
+  service:
+    type: LoadBalancer
+    port: 3000
+  resources:
+    requests:
+      memory: '256Mi'
+      cpu: '250m'
+    limits:
+      memory: '512Mi'
+      cpu: '500m'
+  env:
+    NODE_ENV: production
+    NEXT_PUBLIC_API_URL: http://backend:3001
+    NEXT_PUBLIC_WS_URL: ws://backend:3001
+
+# Backend configuration
+backend:
+  replicaCount: 2
+  image:
+    repository: webscada/backend
+    tag: latest
+    pullPolicy: IfNotPresent
+  service:
+    type: ClusterIP
+    port: 3001
+  resources:
+    requests:
+      memory: '256Mi'
+      cpu: '250m'
+    limits:
+      memory: '512Mi'
+      cpu: '500m'
+  env:
+    NODE_ENV: production
+    PORT: 3001
+    HOST: 0.0.0.0
+    LOG_LEVEL: info
+  autoscaling:
+    enabled: true
+    minReplicas: 2
+    maxReplicas: 10
+    targetCPUUtilizationPercentage: 70
+    targetMemoryUtilizationPercentage: 80
+
+# Simulator configuration
+simulator:
+  replicaCount: 1
+  image:
+    repository: webscada/simulator
+    tag: latest
+    pullPolicy: IfNotPresent
+  service:
+    type: ClusterIP
+    port: 5020
+  resources:
+    requests:
+      memory: '128Mi'
+      cpu: '100m'
+    limits:
+      memory: '256Mi'
+      cpu: '200m'
+  env:
+    SIMULATOR_PORT: 5020
+    SIMULATOR_PROTOCOL: MODBUS_TCP
+    UPDATE_INTERVAL: 1000
+    MIN_VALUE: 0
+    MAX_VALUE: 100
+    VALUE_CHANGE_RATE: 5
+
+# PostgreSQL configuration
+postgresql:
+  enabled: true
+  image:
+    repository: postgres
+    tag: 16-alpine
+  persistence:
+    enabled: true
+    size: 10Gi
+  env:
+    POSTGRES_DB: webscada
+    POSTGRES_USER: webscada
+    POSTGRES_PASSWORD: webscada_password
+  service:
+    port: 5432
+
+# Redis configuration
+redis:
+  enabled: true
+  image:
+    repository: redis
+    tag: 7-alpine
+  persistence:
+    enabled: true
+    size: 5Gi
+  service:
+    port: 6379
+
+# Ingress configuration
+ingress:
+  enabled: false
+  className: nginx
+  annotations:
+    cert-manager.io/cluster-issuer: letsencrypt-prod
+  hosts:
+    - host: webscada.example.com
+      paths:
+        - path: /
+          pathType: Prefix
+          service: frontend
+        - path: /api
+          pathType: Prefix
+          service: backend
+  tls:
+    - secretName: webscada-tls
+      hosts:
+        - webscada.example.com

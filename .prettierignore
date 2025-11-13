@@ -1,0 +1,20 @@
+# Dependencies
+node_modules
+pnpm-lock.yaml
+
+# Build outputs
+dist
+build
+.next
+out
+coverage
+
+# Cache
+.turbo
+.cache
+
+# Logs
+*.log
+
+# OS
+.DS_Store

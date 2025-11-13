@@ -1,0 +1,94 @@
+apiVersion: skaffold/v4beta6
+kind: Config
+metadata:
+  name: webscada
+
+build:
+  artifacts:
+    - image: webscada/frontend
+      context: .
+      docker:
+        dockerfile: infrastructure/docker/frontend.Dockerfile
+    - image: webscada/backend
+      context: .
+      docker:
+        dockerfile: infrastructure/docker/backend.Dockerfile
+    - image: webscada/simulator
+      context: .
+      docker:
+        dockerfile: infrastructure/docker/simulator.Dockerfile
+  local:
+    push: false
+    useBuildkit: true
+
+deploy:
+  kubectl:
+    manifests:
+      - infrastructure/k8s/namespace.yaml
+      - infrastructure/k8s/postgres-deployment.yaml
+      - infrastructure/k8s/redis-deployment.yaml
+      - infrastructure/k8s/backend-deployment.yaml
+      - infrastructure/k8s/frontend-deployment.yaml
+      - infrastructure/k8s/simulator-deployment.yaml
+
+portForward:
+  - resourceType: service
+    resourceName: frontend
+    namespace: webscada
+    port: 3000
+    localPort: 3000
+  - resourceType: service
+    resourceName: backend
+    namespace: webscada
+    port: 3001
+    localPort: 3001
+
+profiles:
+  # Development profile
+  - name: dev
+    activation:
+      - command: dev
+    build:
+      artifacts:
+        - image: webscada/frontend
+          sync:
+            manual:
+              - src: 'apps/frontend/src/**/*.tsx'
+                dest: /app/apps/frontend/src
+              - src: 'apps/frontend/src/**/*.ts'
+                dest: /app/apps/frontend/src
+        - image: webscada/backend
+          sync:
+            manual:
+              - src: 'apps/backend/src/**/*.ts'
+                dest: /app/apps/backend/src
+    deploy:
+      kubectl:
+        manifests:
+          - infrastructure/k8s/namespace.yaml
+          - infrastructure/k8s/postgres-deployment.yaml
+          - infrastructure/k8s/redis-deployment.yaml
+          - infrastructure/k8s/backend-deployment.yaml
+          - infrastructure/k8s/frontend-deployment.yaml
+          - infrastructure/k8s/simulator-deployment.yaml
+
+  # Production profile with Helm
+  - name: prod
+    build:
+      tagPolicy:
+        gitCommit: {}
+      local:
+        push: true
+    deploy:
+      helm:
+        releases:
+          - name: webscada
+            chartPath: infrastructure/helm/webscada
+            namespace: webscada
+            createNamespace: true
+            valuesFiles:
+              - infrastructure/helm/webscada/values.yaml
+            setValues:
+              frontend.image.tag: '{{.IMAGE_TAG_webscada_frontend}}'
+              backend.image.tag: '{{.IMAGE_TAG_webscada_backend}}'
+              simulator.image.tag: '{{.IMAGE_TAG_webscada_simulator}}'
