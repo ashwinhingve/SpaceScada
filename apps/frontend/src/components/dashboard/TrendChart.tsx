@@ -2,19 +2,20 @@
 
 import { useMemo } from 'react';
 import {
-  LineChart,
+  CartesianGrid,
+  Legend,
   Line,
+  LineChart,
+  ResponsiveContainer,
+  Tooltip,
+  TooltipProps,
   XAxis,
   YAxis,
-  CartesianGrid,
-  Tooltip,
-  Legend,
-  ResponsiveContainer,
-  TooltipProps,
 } from 'recharts';
+
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { DataPoint, DeviceTag } from '@/types/dashboard';
 import { cn } from '@/lib/utils';
+import { DataPoint, DeviceTag } from '@/types/dashboard';
 
 interface TrendChartProps {
   title: string;
@@ -28,12 +29,12 @@ interface TrendChartProps {
 }
 
 const CHART_COLORS = [
-  'rgb(59, 130, 246)',   // blue
-  'rgb(34, 197, 94)',    // green
-  'rgb(249, 115, 22)',   // orange
-  'rgb(168, 85, 247)',   // purple
-  'rgb(236, 72, 153)',   // pink
-  'rgb(14, 165, 233)',   // cyan
+  'rgb(59, 130, 246)', // blue
+  'rgb(34, 197, 94)', // green
+  'rgb(249, 115, 22)', // orange
+  'rgb(168, 85, 247)', // purple
+  'rgb(236, 72, 153)', // pink
+  'rgb(14, 165, 233)', // cyan
 ];
 
 interface ChartDataPoint {
@@ -52,12 +53,11 @@ const CustomTooltip = ({ active, payload, label }: TooltipProps<number, string>)
       <p className="text-sm font-medium mb-2">{label}</p>
       {payload.map((entry, index) => (
         <div key={index} className="flex items-center gap-2 text-sm">
-          <div
-            className="w-3 h-3 rounded-full"
-            style={{ backgroundColor: entry.color }}
-          />
+          <div className="w-3 h-3 rounded-full" style={{ backgroundColor: entry.color }} />
           <span className="text-muted-foreground">{entry.name}:</span>
-          <span className="font-medium">{typeof entry.value === 'number' ? entry.value.toFixed(2) : entry.value}</span>
+          <span className="font-medium">
+            {typeof entry.value === 'number' ? entry.value.toFixed(2) : entry.value}
+          </span>
         </div>
       ))}
     </div>
@@ -145,24 +145,15 @@ export const TrendChart = ({
       </CardHeader>
       <CardContent>
         <ResponsiveContainer width="100%" height={height}>
-          <LineChart
-            data={chartData}
-            margin={{ top: 5, right: 30, left: 20, bottom: 5 }}
-          >
-            {showGrid && (
-              <CartesianGrid strokeDasharray="3 3" className="stroke-muted" />
-            )}
+          <LineChart data={chartData} margin={{ top: 5, right: 30, left: 20, bottom: 5 }}>
+            {showGrid && <CartesianGrid strokeDasharray="3 3" className="stroke-muted" />}
             <XAxis
               dataKey="formattedTime"
               tick={{ fontSize: 12 }}
               className="text-muted-foreground"
               tickMargin={10}
             />
-            <YAxis
-              tick={{ fontSize: 12 }}
-              className="text-muted-foreground"
-              tickMargin={10}
-            />
+            <YAxis tick={{ fontSize: 12 }} className="text-muted-foreground" tickMargin={10} />
             <Tooltip content={<CustomTooltip />} />
             {showLegend && (
               <Legend

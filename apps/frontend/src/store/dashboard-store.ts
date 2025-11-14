@@ -1,5 +1,6 @@
 import { create } from 'zustand';
-import { DashboardState, ConnectionStatus, DeviceData, DataPoint, DeviceTag } from '@/types/dashboard';
+
+import { ConnectionStatus, DashboardState, DataPoint, DeviceData } from '@/types/dashboard';
 
 const MAX_HISTORY_SIZE = 100;
 

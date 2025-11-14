@@ -1,5 +1,6 @@
-import { useEffect, useRef, useCallback } from 'react';
+import { useCallback, useEffect, useRef } from 'react';
 import { io, Socket } from 'socket.io-client';
+
 import { useDashboardStore } from '@/store/dashboard-store';
 import { ConnectionStatus, DataUpdatePayload, DeviceStatusPayload } from '@/types/dashboard';
 
@@ -10,11 +11,7 @@ interface UseWebSocketOptions {
 }
 
 export const useWebSocket = (options: UseWebSocketOptions) => {
-  const {
-    url,
-    autoConnect = true,
-    maxReconnectAttempts = 10,
-  } = options;
+  const { url, autoConnect = true, maxReconnectAttempts = 10 } = options;
 
   const socketRef = useRef<Socket | null>(null);
   const reconnectTimeoutRef = useRef<NodeJS.Timeout>();
@@ -24,7 +21,6 @@ export const useWebSocket = (options: UseWebSocketOptions) => {
     setConnectionStatus,
     incrementReconnectAttempts,
     resetReconnectAttempts,
-    reconnectAttempts,
     updateDeviceTags,
     updateDeviceStatus,
   } = useDashboardStore();
@@ -73,7 +69,9 @@ export const useWebSocket = (options: UseWebSocketOptions) => {
 
       if (currentAttempts < maxReconnectAttempts) {
         const delay = getReconnectDelay(currentAttempts);
-        console.log(`Reconnecting in ${delay}ms (attempt ${currentAttempts + 1}/${maxReconnectAttempts})`);
+        console.log(
+          `Reconnecting in ${delay}ms (attempt ${currentAttempts + 1}/${maxReconnectAttempts})`
+        );
 
         reconnectTimeoutRef.current = setTimeout(() => {
           incrementReconnectAttempts();

@@ -1,24 +1,20 @@
 'use client';
 
-import { useState, useEffect, useMemo } from 'react';
-import { Header } from '@/components/layout/Header';
-import { Sidebar } from '@/components/layout/Sidebar';
+import { useEffect, useMemo, useState } from 'react';
+
 import { DataCard } from '@/components/dashboard/DataCard';
-import { TrendChart } from '@/components/dashboard/TrendChart';
 import { DeviceStatus } from '@/components/dashboard/DeviceStatus';
 import { MetricGauge } from '@/components/dashboard/MetricGauge';
+import { TrendChart } from '@/components/dashboard/TrendChart';
+import { Header } from '@/components/layout/Header';
+import { Sidebar } from '@/components/layout/Sidebar';
 import { useWebSocket } from '@/hooks/useWebSocket';
 import { useDashboardStore } from '@/store/dashboard-store';
 
 export default function DashboardPage() {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
-  const {
-    devices,
-    selectedDeviceId,
-    tagHistory,
-    setDevices,
-  } = useDashboardStore();
+  const { devices, selectedDeviceId, tagHistory, setDevices } = useDashboardStore();
 
   // Initialize WebSocket connection
   const { subscribe, unsubscribe } = useWebSocket({
@@ -90,10 +86,7 @@ export default function DashboardPage() {
       <Header onMenuClick={() => setIsSidebarOpen(!isSidebarOpen)} />
 
       <div className="flex">
-        <Sidebar
-          isOpen={isSidebarOpen}
-          onClose={() => setIsSidebarOpen(false)}
-        />
+        <Sidebar isOpen={isSidebarOpen} onClose={() => setIsSidebarOpen(false)} />
 
         <main className="flex-1 p-4 lg:p-6 overflow-auto">
           {/* Overview section */}
@@ -181,11 +174,7 @@ export default function DashboardPage() {
                   <h3 className="text-xl font-semibold mb-4">Real-time Data</h3>
                   <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                     {selectedDevice.tags.map((tag) => (
-                      <DataCard
-                        key={tag.id}
-                        tag={tag}
-                        history={tagHistory.get(tag.id) || []}
-                      />
+                      <DataCard key={tag.id} tag={tag} history={tagHistory.get(tag.id) || []} />
                     ))}
                   </div>
                 </div>
@@ -212,7 +201,8 @@ export default function DashboardPage() {
               </div>
               <h3 className="text-lg font-semibold mb-2">No Device Selected</h3>
               <p className="text-muted-foreground max-w-md">
-                Select a device from the sidebar to view its real-time data, trends, and status information.
+                Select a device from the sidebar to view its real-time data, trends, and status
+                information.
               </p>
             </div>
           )}

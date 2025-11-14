@@ -1,7 +1,7 @@
 'use client';
 
-import React, { Component, ErrorInfo, ReactNode } from 'react';
 import { AlertTriangle } from 'lucide-react';
+import React, { Component, ErrorInfo, ReactNode } from 'react';
 
 interface ErrorBoundaryProps {
   children: ReactNode;
@@ -60,7 +60,8 @@ export class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundarySt
 
             <div className="mb-4">
               <p className="text-sm text-muted-foreground mb-2">
-                An error occurred while rendering this component. Please try again or contact support if the problem persists.
+                An error occurred while rendering this component. Please try again or contact
+                support if the problem persists.
               </p>
               {this.state.error && (
                 <details className="mt-4">

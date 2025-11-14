@@ -1,7 +1,7 @@
 'use client';
 
-import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
+import { useEffect, useState } from 'react';
 
 type Status = 'ONLINE' | 'OFFLINE';
 
@@ -27,9 +27,7 @@ export default function Home() {
           <div className="flex items-center gap-2">
             <div
               className={`w-4 h-4 rounded-full ${
-                status === 'ONLINE'
-                  ? 'bg-green-500'
-                  : 'bg-gray-400'
+                status === 'ONLINE' ? 'bg-green-500' : 'bg-gray-400'
               }`}
             />
             <span className="text-lg">{status}</span>

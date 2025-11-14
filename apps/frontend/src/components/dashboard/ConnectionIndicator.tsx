@@ -1,9 +1,10 @@
 'use client';
 
+import { AlertTriangle, Loader2, Wifi, WifiOff } from 'lucide-react';
+
+import { cn } from '@/lib/utils';
 import { useDashboardStore } from '@/store/dashboard-store';
 import { ConnectionStatus } from '@/types/dashboard';
-import { cn } from '@/lib/utils';
-import { Wifi, WifiOff, Loader2, AlertTriangle } from 'lucide-react';
 
 interface ConnectionIndicatorProps {
   className?: string;
@@ -64,7 +65,13 @@ export const ConnectionIndicator = ({ className, showLabel = true }: ConnectionI
 
   return (
     <div className={cn('flex items-center gap-2', className)}>
-      <div className={cn('relative flex items-center justify-center', config.bgColor, 'rounded-full p-2')}>
+      <div
+        className={cn(
+          'relative flex items-center justify-center',
+          config.bgColor,
+          'rounded-full p-2'
+        )}
+      >
         <Icon
           className={cn('h-4 w-4', config.color, config.animate && 'animate-spin')}
           aria-hidden="true"
@@ -78,11 +85,7 @@ export const ConnectionIndicator = ({ className, showLabel = true }: ConnectionI
           aria-label={config.label}
         />
       </div>
-      {showLabel && (
-        <span className={cn('text-sm font-medium', config.color)}>
-          {config.label}
-        </span>
-      )}
+      {showLabel && <span className={cn('text-sm font-medium', config.color)}>{config.label}</span>}
     </div>
   );
 };

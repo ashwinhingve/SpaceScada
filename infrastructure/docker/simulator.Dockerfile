@@ -38,23 +38,35 @@ RUN pnpm --filter @webscada/simulator build
 FROM node:18-alpine AS runner
 WORKDIR /app
 
-ENV NODE_ENV production
+ENV NODE_ENV=production
 
+RUN apk add --no-cache libc6-compat
 RUN addgroup --system --gid 1001 nodejs
 RUN adduser --system --uid 1001 nodejs
 
-# Copy built application and dependencies
+# Install pnpm
+RUN npm install -g pnpm@8.12.0
+
+# Copy package files
+COPY --from=deps /app/package.json /app/pnpm-workspace.yaml /app/pnpm-lock.yaml ./
+COPY --from=deps /app/apps/simulator/package.json ./apps/simulator/
+COPY --from=deps /app/packages/shared-types/package.json ./packages/shared-types/
+COPY --from=deps /app/packages/utils/package.json ./packages/utils/
+COPY --from=deps /app/packages/protocols/package.json ./packages/protocols/
+
+# Install production dependencies only (ignore scripts to skip husky)
+RUN pnpm install --frozen-lockfile --prod --ignore-scripts
+
+# Copy built application
 COPY --from=builder --chown=nodejs:nodejs /app/apps/simulator/dist ./apps/simulator/dist
 COPY --from=builder --chown=nodejs:nodejs /app/packages/shared-types/dist ./packages/shared-types/dist
 COPY --from=builder --chown=nodejs:nodejs /app/packages/utils/dist ./packages/utils/dist
 COPY --from=builder --chown=nodejs:nodejs /app/packages/protocols/dist ./packages/protocols/dist
-COPY --from=builder --chown=nodejs:nodejs /app/node_modules ./node_modules
-COPY --from=builder --chown=nodejs:nodejs /app/package.json ./
 
 USER nodejs
 
 EXPOSE 5020
 
-ENV SIMULATOR_PORT 5020
+ENV SIMULATOR_PORT=5020
 
 CMD ["node", "apps/simulator/dist/index.js"]

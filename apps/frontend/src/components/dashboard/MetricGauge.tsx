@@ -1,6 +1,7 @@
 'use client';
 
 import { useMemo } from 'react';
+
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { cn } from '@/lib/utils';
 
@@ -146,7 +147,13 @@ export const MetricGauge = ({
           </div>
         </div>
         <div className="mt-4 text-center">
-          <div className={cn('inline-flex items-center gap-2 px-3 py-1 rounded-full text-sm font-medium', getStatusColor, 'bg-opacity-10')}>
+          <div
+            className={cn(
+              'inline-flex items-center gap-2 px-3 py-1 rounded-full text-sm font-medium',
+              getStatusColor,
+              'bg-opacity-10'
+            )}
+          >
             <div className={cn('w-2 h-2 rounded-full', getStatusColor.replace('text', 'bg'))} />
             {getStatusLabel}
           </div>

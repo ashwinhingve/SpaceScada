@@ -1,8 +1,9 @@
 'use client';
 
+import { Bell, Menu } from 'lucide-react';
+
 import { ConnectionIndicator } from '@/components/dashboard/ConnectionIndicator';
 import { cn } from '@/lib/utils';
-import { Menu, Bell } from 'lucide-react';
 
 interface HeaderProps {
   onMenuClick?: () => void;

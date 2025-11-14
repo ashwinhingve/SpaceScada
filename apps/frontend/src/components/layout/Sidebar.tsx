@@ -1,10 +1,11 @@
 'use client';
 
+import { Activity, AlertCircle, ChevronRight, Filter, Search, XCircle } from 'lucide-react';
+import { useMemo, useState } from 'react';
+
+import { cn } from '@/lib/utils';
 import { useDashboardStore } from '@/store/dashboard-store';
 import { DeviceData } from '@/types/dashboard';
-import { cn } from '@/lib/utils';
-import { Activity, AlertCircle, XCircle, ChevronRight, Filter, Search } from 'lucide-react';
-import { useState, useMemo } from 'react';
 
 interface SidebarProps {
   className?: string;
@@ -59,9 +60,7 @@ const DeviceListItem = ({
           </div>
           <p className="text-xs text-muted-foreground truncate">{device.type}</p>
           {device.location && (
-            <p className="text-xs text-muted-foreground truncate mt-1">
-              📍 {device.location}
-            </p>
+            <p className="text-xs text-muted-foreground truncate mt-1">📍 {device.location}</p>
           )}
           <div className="flex items-center gap-2 mt-2 text-xs">
             <span className="text-muted-foreground">Tags:</span>
@@ -242,7 +241,9 @@ export const Sidebar = ({ className, isOpen = true, onClose }: SidebarProps) => 
             <div className="space-y-2">
               {filteredDevices.length === 0 ? (
                 <div className="text-center py-8 text-muted-foreground text-sm">
-                  {searchQuery || statusFilter !== 'ALL' ? 'No devices match your filters' : 'No devices available'}
+                  {searchQuery || statusFilter !== 'ALL'
+                    ? 'No devices match your filters'
+                    : 'No devices available'}
                 </div>
               ) : (
                 filteredDevices.map((device) => (

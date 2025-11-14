@@ -1,10 +1,11 @@
 'use client';
 
+import { Minus, TrendingDown, TrendingUp } from 'lucide-react';
 import { useMemo } from 'react';
+
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { DeviceTag, DataPoint } from '@/types/dashboard';
 import { cn } from '@/lib/utils';
-import { TrendingUp, TrendingDown, Minus } from 'lucide-react';
+import { DataPoint, DeviceTag } from '@/types/dashboard';
 
 interface DataCardProps {
   tag: DeviceTag;
@@ -14,7 +15,11 @@ interface DataCardProps {
 
 const Sparkline = ({ data, color = 'rgb(59, 130, 246)' }: { data: number[]; color?: string }) => {
   if (data.length < 2) {
-    return <div className="h-12 flex items-center justify-center text-muted-foreground text-xs">No data</div>;
+    return (
+      <div className="h-12 flex items-center justify-center text-muted-foreground text-xs">
+        No data
+      </div>
+    );
   }
 
   const width = 120;
@@ -25,11 +30,13 @@ const Sparkline = ({ data, color = 'rgb(59, 130, 246)' }: { data: number[]; colo
   const max = Math.max(...data);
   const range = max - min || 1;
 
-  const points = data.map((value, index) => {
-    const x = (index / (data.length - 1)) * (width - 2 * padding) + padding;
-    const y = height - ((value - min) / range) * (height - 2 * padding) - padding;
-    return `${x},${y}`;
-  }).join(' ');
+  const points = data
+    .map((value, index) => {
+      const x = (index / (data.length - 1)) * (width - 2 * padding) + padding;
+      const y = height - ((value - min) / range) * (height - 2 * padding) - padding;
+      return `${x},${y}`;
+    })
+    .join(' ');
 
   return (
     <svg width={width} height={height} className="overflow-visible">
@@ -137,15 +144,19 @@ export const DataCard = ({ tag, history = [], className }: DataCardProps) => {
       <CardHeader className="pb-2">
         <div className="flex items-start justify-between">
           <div className="flex-1">
-            <CardTitle className="text-sm font-medium text-muted-foreground">
-              {tag.name}
-            </CardTitle>
+            <CardTitle className="text-sm font-medium text-muted-foreground">{tag.name}</CardTitle>
             <CardDescription className="text-xs mt-1">
               {tag.dataType}
               {tag.unit && ` (${tag.unit})`}
             </CardDescription>
           </div>
-          <div className={cn('text-xs font-medium px-2 py-1 rounded', getQualityColor(), 'bg-opacity-10')}>
+          <div
+            className={cn(
+              'text-xs font-medium px-2 py-1 rounded',
+              getQualityColor(),
+              'bg-opacity-10'
+            )}
+          >
             {tag.quality}
           </div>
         </div>
@@ -162,9 +173,7 @@ export const DataCard = ({ tag, history = [], className }: DataCardProps) => {
               <span className={cn('font-medium', getTrendColor())}>
                 {trendPercentage.toFixed(1)}%
               </span>
-              <span className="text-muted-foreground text-xs">
-                from first reading
-              </span>
+              <span className="text-muted-foreground text-xs">from first reading</span>
             </div>
           </div>
           <div className="ml-4">
@@ -174,8 +183,8 @@ export const DataCard = ({ tag, history = [], className }: DataCardProps) => {
                 trend === 'up'
                   ? 'rgb(34, 197, 94)'
                   : trend === 'down'
-                  ? 'rgb(239, 68, 68)'
-                  : 'rgb(107, 114, 128)'
+                    ? 'rgb(239, 68, 68)'
+                    : 'rgb(107, 114, 128)'
               }
             />
           </div>

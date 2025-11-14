@@ -1,9 +1,10 @@
 'use client';
 
-import { DeviceData } from '@/types/dashboard';
-import { cn } from '@/lib/utils';
 import { Activity, AlertCircle, XCircle } from 'lucide-react';
+
 import { Badge } from '@/components/ui/badge';
+import { cn } from '@/lib/utils';
+import { DeviceData } from '@/types/dashboard';
 
 interface DeviceStatusProps {
   device: DeviceData;
@@ -76,9 +77,7 @@ export const DeviceStatus = ({ device, className, variant = 'compact' }: DeviceS
         <div className={cn('rounded-full p-1', config.bgColor)}>
           <Icon className={cn('h-3 w-3', config.color)} aria-hidden="true" />
         </div>
-        <span className={cn('text-sm font-medium', config.color)}>
-          {config.label}
-        </span>
+        <span className={cn('text-sm font-medium', config.color)}>{config.label}</span>
       </div>
     );
   }
@@ -104,7 +103,8 @@ export const DeviceStatus = ({ device, className, variant = 'compact' }: DeviceS
               </p>
             )}
             <p>
-              <span className="font-medium">Last Update:</span> {formatLastUpdate(device.lastUpdate)}
+              <span className="font-medium">Last Update:</span>{' '}
+              {formatLastUpdate(device.lastUpdate)}
             </p>
           </div>
         </div>
@@ -113,7 +113,7 @@ export const DeviceStatus = ({ device, className, variant = 'compact' }: DeviceS
         </Badge>
       </div>
       {Array.isArray(device.tags) && device.tags.length > 0 && (
-      // {device.tags.length > 0 && (
+        // {device.tags.length > 0 && (
         <div className="mt-4 pt-4 border-t">
           <p className="text-sm font-medium mb-2">Active Tags: {device.tags.length}</p>
           <div className="flex flex-wrap gap-1">
