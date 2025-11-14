@@ -1,0 +1,127 @@
+# Bitnami PostgreSQL Helm Chart Values for WebSCADA
+# Install with: helm install postgresql bitnami/postgresql -f postgresql-values.yaml -n webscada
+
+## Global configuration
+global:
+  postgresql:
+    auth:
+      username: webscada
+      password: webscada_password  # Change in production
+      database: webscada
+      existingSecret: ''  # Use existing secret in production
+
+## PostgreSQL configuration
+auth:
+  username: webscada
+  password: webscada_password  # Change in production
+  database: webscada
+  existingSecret: ''  # Use 'postgres-secret' for existing secret
+
+## Primary configuration
+primary:
+  name: primary
+
+  ## Resource limits optimized for SCADA workload
+  resources:
+    requests:
+      memory: 512Mi
+      cpu: 500m
+    limits:
+      memory: 1Gi
+      cpu: 1000m
+
+  ## Persistence configuration
+  persistence:
+    enabled: true
+    storageClass: ''  # Use default storage class
+    size: 10Gi
+    accessModes:
+      - ReadWriteOnce
+
+  ## PostgreSQL configuration for SCADA workload
+  extendedConfiguration: |
+    # Connection settings
+    max_connections = 100
+
+    # Memory settings
+    shared_buffers = 256MB
+    effective_cache_size = 1GB
+    maintenance_work_mem = 64MB
+    checkpoint_completion_target = 0.9
+    wal_buffers = 16MB
+    default_statistics_target = 100
+    random_page_cost = 1.1
+    effective_io_concurrency = 200
+    work_mem = 4MB
+    min_wal_size = 1GB
+    max_wal_size = 4GB
+
+    # Logging
+    log_min_duration_statement = 200
+    log_line_prefix = '%t [%p]: [%l-1] user=%u,db=%d,app=%a,client=%h '
+    log_checkpoints = on
+    log_connections = on
+    log_disconnections = on
+    log_lock_waits = on
+    log_temp_files = 0
+    log_autovacuum_min_duration = 0
+
+    # SCADA-specific tuning
+    synchronous_commit = on
+    wal_compression = on
+
+  ## Liveness and readiness probes
+  livenessProbe:
+    enabled: true
+    initialDelaySeconds: 30
+    periodSeconds: 10
+    timeoutSeconds: 5
+    failureThreshold: 6
+    successThreshold: 1
+
+  readinessProbe:
+    enabled: true
+    initialDelaySeconds: 5
+    periodSeconds: 10
+    timeoutSeconds: 5
+    failureThreshold: 6
+    successThreshold: 1
+
+  ## Pod affinity preset
+  podAntiAffinityPreset: soft
+
+  ## Service configuration
+  service:
+    type: ClusterIP
+    ports:
+      postgresql: 5432
+
+## Metrics configuration (optional)
+metrics:
+  enabled: true
+
+  resources:
+    requests:
+      memory: 64Mi
+      cpu: 50m
+    limits:
+      memory: 128Mi
+      cpu: 100m
+
+  serviceMonitor:
+    enabled: true
+    namespace: webscada
+    interval: 30s
+    scrapeTimeout: 10s
+
+## Volume permissions (for non-root container)
+volumePermissions:
+  enabled: false
+
+## Network Policy
+networkPolicy:
+  enabled: false
+  # Enable in production with specific policies
+
+## Init DB scripts (optional)
+# initdbScriptsConfigMap: postgres-init-script

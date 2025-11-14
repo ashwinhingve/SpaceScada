@@ -1,6 +1,9 @@
+// Socket Service - currently unused, kept for future use
+// Use useWebSocket hook and dashboard store instead
+
 import { io, Socket } from 'socket.io-client';
 
-import type { ScadaEvent } from '@webscada/shared-types';
+type ScadaEvent = Record<string, unknown>;
 
 class SocketService {
   private socket: Socket | null = null;

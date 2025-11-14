@@ -25,11 +25,17 @@ deploy:
   kubectl:
     manifests:
       - infrastructure/k8s/namespace.yaml
+      - infrastructure/k8s/base/postgres-config.yaml
       - infrastructure/k8s/postgres-deployment.yaml
       - infrastructure/k8s/redis-deployment.yaml
+      - infrastructure/k8s/base/backend-config.yaml
+      - infrastructure/k8s/base/backend-secrets.yaml
       - infrastructure/k8s/backend-deployment.yaml
+      - infrastructure/k8s/base/frontend-config.yaml
       - infrastructure/k8s/frontend-deployment.yaml
       - infrastructure/k8s/simulator-deployment.yaml
+      - infrastructure/k8s/ingress.yaml
+      - infrastructure/k8s/monitoring/servicemonitor.yaml
 
 portForward:
   - resourceType: service
@@ -42,6 +48,16 @@ portForward:
     namespace: webscada
     port: 3001
     localPort: 3001
+  - resourceType: service
+    resourceName: postgres
+    namespace: webscada
+    port: 5432
+    localPort: 5432
+  - resourceType: service
+    resourceName: redis
+    namespace: webscada
+    port: 6379
+    localPort: 6379
 
 profiles:
   # Development profile
@@ -66,11 +82,16 @@ profiles:
       kubectl:
         manifests:
           - infrastructure/k8s/namespace.yaml
+          - infrastructure/k8s/base/postgres-config.yaml
           - infrastructure/k8s/postgres-deployment.yaml
           - infrastructure/k8s/redis-deployment.yaml
+          - infrastructure/k8s/base/backend-config.yaml
+          - infrastructure/k8s/base/backend-secrets.yaml
           - infrastructure/k8s/backend-deployment.yaml
+          - infrastructure/k8s/base/frontend-config.yaml
           - infrastructure/k8s/frontend-deployment.yaml
           - infrastructure/k8s/simulator-deployment.yaml
+          - infrastructure/k8s/ingress.yaml
 
   # Production profile with Helm
   - name: prod

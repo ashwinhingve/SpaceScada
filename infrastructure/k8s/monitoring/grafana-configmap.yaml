@@ -1,0 +1,22 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: grafana-dashboard-webscada
+  namespace: webscada
+  labels:
+    app: grafana
+    grafana_dashboard: "1"
+data:
+  webscada-dashboard.json: |
+    {
+      "dashboard": "See grafana-dashboard.json for full content",
+      "overwrite": true,
+      "inputs": [
+        {
+          "name": "DS_PROMETHEUS",
+          "pluginId": "prometheus",
+          "type": "datasource",
+          "value": "Prometheus"
+        }
+      ]
+    }

@@ -112,7 +112,8 @@ export const DeviceStatus = ({ device, className, variant = 'compact' }: DeviceS
           {config.label}
         </Badge>
       </div>
-      {device.tags.length > 0 && (
+      {Array.isArray(device.tags) && device.tags.length > 0 && (
+      // {device.tags.length > 0 && (
         <div className="mt-4 pt-4 border-t">
           <p className="text-sm font-medium mb-2">Active Tags: {device.tags.length}</p>
           <div className="flex flex-wrap gap-1">

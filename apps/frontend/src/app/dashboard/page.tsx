@@ -46,9 +46,13 @@ export default function DashboardPage() {
     fetchDevices();
   }, [setDevices]);
 
+  // Get stable device IDs list
+  const deviceIds = useMemo(() => {
+    return Array.from(devices.values()).map((device) => device.id);
+  }, [devices]);
+
   // Subscribe to all devices
   useEffect(() => {
-    const deviceIds = Array.from(devices.values()).map((device) => device.id);
     if (deviceIds.length > 0) {
       subscribe(deviceIds);
     }
@@ -58,7 +62,8 @@ export default function DashboardPage() {
         unsubscribe(deviceIds);
       }
     };
-  }, [devices, subscribe, unsubscribe]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [deviceIds.length]); // Only resubscribe if number of devices changes
 
   const selectedDevice = useMemo(() => {
     return selectedDeviceId ? devices.get(selectedDeviceId) : null;

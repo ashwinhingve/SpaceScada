@@ -1,16 +1,18 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import { useRouter } from 'next/navigation';
 
-import { DeviceStatus } from '@webscada/shared-types';
+type Status = 'ONLINE' | 'OFFLINE';
 
 export default function Home() {
-  const [status, setStatus] = useState<DeviceStatus>(DeviceStatus.OFFLINE);
+  const router = useRouter();
+  const [status, setStatus] = useState<Status>('OFFLINE');
 
   useEffect(() => {
     // Simulate device status update
     const timer = setTimeout(() => {
-      setStatus(DeviceStatus.ONLINE);
+      setStatus('ONLINE');
     }, 1000);
 
     return () => clearTimeout(timer);
@@ -25,13 +27,19 @@ export default function Home() {
           <div className="flex items-center gap-2">
             <div
               className={`w-4 h-4 rounded-full ${
-                status === DeviceStatus.ONLINE
+                status === 'ONLINE'
                   ? 'bg-green-500'
                   : 'bg-gray-400'
               }`}
             />
             <span className="text-lg">{status}</span>
           </div>
+          <button
+            onClick={() => router.push('/dashboard')}
+            className="mt-4 w-full px-4 py-2 bg-primary text-primary-foreground rounded-md hover:bg-primary/90 transition-colors"
+          >
+            Open Dashboard
+          </button>
         </div>
         <div className="mt-8 grid grid-cols-1 md:grid-cols-3 gap-4">
           <div className="bg-card rounded-lg p-4 shadow">

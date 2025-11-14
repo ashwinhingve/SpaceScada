@@ -37,6 +37,19 @@ spec:
       labels:
         app: backend
     spec:
+      # Anti-affinity rules for pod distribution across nodes
+      affinity:
+        podAntiAffinity:
+          preferredDuringSchedulingIgnoredDuringExecution:
+            - weight: 100
+              podAffinityTerm:
+                labelSelector:
+                  matchExpressions:
+                    - key: app
+                      operator: In
+                      values:
+                        - backend
+                topologyKey: kubernetes.io/hostname
       containers:
         - name: backend
           image: webscada/backend:latest
@@ -55,32 +68,44 @@ spec:
               port: 3001
             initialDelaySeconds: 30
             periodSeconds: 10
+            timeoutSeconds: 5
+            failureThreshold: 3
           readinessProbe:
             httpGet:
               path: /health
               port: 3001
             initialDelaySeconds: 5
             periodSeconds: 5
+            timeoutSeconds: 3
+            failureThreshold: 2
           resources:
             requests:
               memory: '256Mi'
-              cpu: '250m'
+              cpu: '200m'
             limits:
-              memory: '512Mi'
-              cpu: '500m'
+              memory: '256Mi'
+              cpu: '200m'
 ---
 apiVersion: v1
 kind: Service
 metadata:
   name: backend
   namespace: webscada
+  labels:
+    app: backend
 spec:
   selector:
     app: backend
   ports:
     - port: 3001
       targetPort: 3001
+      name: http
   type: ClusterIP
+  # Session affinity for WebSocket connections
+  sessionAffinity: ClientIP
+  sessionAffinityConfig:
+    clientIP:
+      timeoutSeconds: 10800  # 3 hours
 ---
 apiVersion: autoscaling/v2
 kind: HorizontalPodAutoscaler

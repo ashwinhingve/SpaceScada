@@ -65,7 +65,8 @@ const DeviceListItem = ({
           )}
           <div className="flex items-center gap-2 mt-2 text-xs">
             <span className="text-muted-foreground">Tags:</span>
-            <span className="font-medium">{device.tags.length}</span>
+            {/* <span className="font-medium">{device.tags.length}</span> */}
+            {Array.isArray(device.tags) ? device.tags.length : 0}
           </div>
         </div>
         {isSelected && <ChevronRight className="h-4 w-4 text-primary flex-shrink-0 ml-2" />}
@@ -79,32 +80,73 @@ export const Sidebar = ({ className, isOpen = true, onClose }: SidebarProps) => 
   const [searchQuery, setSearchQuery] = useState('');
   const [statusFilter, setStatusFilter] = useState<'ALL' | 'ONLINE' | 'OFFLINE' | 'ERROR'>('ALL');
 
+  // const deviceList = useMemo(() => {
+  //   return Array.from(devices.values());
+  // }, [devices]);
+
+  // const filteredDevices = useMemo(() => {
+  //   return deviceList.filter((device) => {
+  //     const matchesSearch =
+  //       device.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+  //       device.type.toLowerCase().includes(searchQuery.toLowerCase()) ||
+  //       (device.location && device.location.toLowerCase().includes(searchQuery.toLowerCase()));
+
+  //     const matchesStatus = statusFilter === 'ALL' || device.status === statusFilter;
+
+  //     return matchesSearch && matchesStatus;
+  //   });
+  // }, [deviceList, searchQuery, statusFilter]);
+
+  // const statusCounts = useMemo(() => {
+  //   return deviceList.reduce(
+  //     (acc, device) => {
+  //       acc[device.status]++;
+  //       acc.ALL++;
+  //       return acc;
+  //     },
+  //     { ALL: 0, ONLINE: 0, OFFLINE: 0, ERROR: 0 } as Record<string, number>
+  //   );
+  // }, [deviceList]);
+  // ensure we only work with actual device objects
   const deviceList = useMemo(() => {
-    return Array.from(devices.values());
+    // devices is assumed to be a Map — filter out any non-truthy values just in case
+    return Array.from(devices.values()).filter(Boolean) as DeviceData[];
   }, [devices]);
 
   const filteredDevices = useMemo(() => {
-    return deviceList.filter((device) => {
-      const matchesSearch =
-        device.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        device.type.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        (device.location && device.location.toLowerCase().includes(searchQuery.toLowerCase()));
+    const q = (searchQuery ?? '').toLowerCase();
 
-      const matchesStatus = statusFilter === 'ALL' || device.status === statusFilter;
+    return deviceList.filter((device) => {
+      // guard every field that we call toLowerCase on
+      const name = (device?.name ?? '').toLowerCase();
+      const type = (device?.type ?? '').toLowerCase();
+      const location = (device?.location ?? '').toLowerCase();
+
+      const matchesSearch =
+        name.includes(q) || type.includes(q) || (location && location.includes(q));
+
+      const matchesStatus = statusFilter === 'ALL' || device?.status === statusFilter;
 
       return matchesSearch && matchesStatus;
     });
   }, [deviceList, searchQuery, statusFilter]);
 
   const statusCounts = useMemo(() => {
-    return deviceList.reduce(
-      (acc, device) => {
-        acc[device.status]++;
-        acc.ALL++;
-        return acc;
-      },
-      { ALL: 0, ONLINE: 0, OFFLINE: 0, ERROR: 0 } as Record<string, number>
-    );
+    // initialize explicitly
+    const acc: Record<string, number> = { ALL: 0, ONLINE: 0, OFFLINE: 0, ERROR: 0 };
+
+    for (const device of deviceList) {
+      // be defensive about status value
+      const status = device?.status ?? 'OFFLINE'; // or use 'UNKNOWN' if you prefer
+      if (!(status in acc)) {
+        // if API returns unexpected status, add it dynamically so counting won't crash
+        acc[status] = 0;
+      }
+      acc[status]++;
+      acc.ALL++;
+    }
+
+    return acc;
   }, [deviceList]);
 
   return (

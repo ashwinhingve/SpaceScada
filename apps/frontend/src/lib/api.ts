@@ -1,6 +1,31 @@
-import type { ApiResponse, Device, Tag, Alarm } from '@webscada/shared-types';
+// API Client - currently unused, kept for future use
+// Use dashboard-specific types and store instead
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
+interface ApiResponse<T> {
+  success: boolean;
+  data: T;
+  timestamp: string;
+}
+
+interface Device {
+  id: string;
+  name: string;
+  [key: string]: unknown;
+}
+
+interface Tag {
+  id: string;
+  name: string;
+  [key: string]: unknown;
+}
+
+interface Alarm {
+  id: string;
+  message: string;
+  [key: string]: unknown;
+}
+
+const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3002';
 
 class ApiClient {
   private baseUrl: string;

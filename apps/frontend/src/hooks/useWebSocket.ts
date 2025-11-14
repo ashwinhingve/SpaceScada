@@ -68,9 +68,12 @@ export const useWebSocket = (options: UseWebSocketOptions) => {
       }
 
       // Attempt reconnection with exponential backoff
-      if (reconnectAttempts < maxReconnectAttempts) {
-        const delay = getReconnectDelay(reconnectAttempts);
-        console.log(`Reconnecting in ${delay}ms (attempt ${reconnectAttempts + 1}/${maxReconnectAttempts})`);
+      // Get fresh reconnectAttempts from store to avoid stale closure
+      const currentAttempts = useDashboardStore.getState().reconnectAttempts;
+
+      if (currentAttempts < maxReconnectAttempts) {
+        const delay = getReconnectDelay(currentAttempts);
+        console.log(`Reconnecting in ${delay}ms (attempt ${currentAttempts + 1}/${maxReconnectAttempts})`);
 
         reconnectTimeoutRef.current = setTimeout(() => {
           incrementReconnectAttempts();
@@ -113,7 +116,6 @@ export const useWebSocket = (options: UseWebSocketOptions) => {
     setConnectionStatus,
     resetReconnectAttempts,
     incrementReconnectAttempts,
-    reconnectAttempts,
     maxReconnectAttempts,
     getReconnectDelay,
     updateDeviceTags,
@@ -161,7 +163,8 @@ export const useWebSocket = (options: UseWebSocketOptions) => {
     return () => {
       disconnect();
     };
-  }, [autoConnect]); // Only run on mount
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [autoConnect]); // Only run on mount - connect/disconnect intentionally excluded
 
   return {
     connect,
