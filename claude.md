@@ -687,11 +687,17 @@ pnpm test:e2e
 
 ### Internal Documentation
 
-- `ARCHITECTURE.md` - System design and architecture decisions
-- `DEPLOYMENT-GUIDE.md` - Complete deployment procedures
-- `CODEBASE-VERIFICATION.md` - Verification report with all fixes
-- `infrastructure/k8s/README.md` - Kubernetes deployment details
-- `CONTRIBUTING.md` - Contribution guidelines
+All documentation has been organized in the `/docs` directory:
+
+- `docs/architecture/ARCHITECTURE.md` - System design and architecture decisions
+- `docs/deployment/DEPLOYMENT-GUIDE.md` - Complete deployment procedures
+- `docs/development/CODEBASE-VERIFICATION.md` - Verification report with all fixes
+- `docs/infrastructure/k8s-readme.md` - Kubernetes deployment details
+- `docs/development/CONTRIBUTING.md` - Contribution guidelines
+- `docs/guides/` - Integration guides for ESP32, GSM, and other devices
+- `docs/frontend/` - Frontend-specific documentation
+
+See [docs/README.md](./docs/README.md) for the complete documentation index.
 
 ### External Resources
 

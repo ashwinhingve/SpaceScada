@@ -6,8 +6,6 @@ export const metricsRoutes = async (fastify: FastifyInstance, metrics: MetricsSe
     '/metrics',
     {
       schema: {
-        description: 'Prometheus metrics endpoint',
-        tags: ['metrics'],
         response: {
           200: {
             type: 'string',
@@ -15,7 +13,7 @@ export const metricsRoutes = async (fastify: FastifyInstance, metrics: MetricsSe
         },
       },
     },
-    async (request, reply) => {
+    async (_request, reply) => {
       if (!metrics.isEnabled()) {
         return reply.status(404).send('Metrics disabled');
       }

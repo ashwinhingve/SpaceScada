@@ -1,40 +1,39 @@
-// Device Types
-export interface Device {
-  id: string;
-  name: string;
-  type: DeviceType;
-  status: DeviceStatus;
-  protocol: ProtocolType;
-  connectionConfig: ConnectionConfig;
-  tags: Tag[];
-  createdAt: Date;
-  updatedAt: Date;
+/**
+ * WebSCADA Production Types
+ * Central export for all type definitions
+ * Supports: GSM ESP32, LoRaWAN, Standard MQTT
+ */
+
+// ============================================
+// NEW PRODUCTION TYPES
+// ============================================
+
+// Device types (3 device types: GSM ESP32, LoRaWAN, Standard MQTT)
+export * from './devices';
+
+// Alarm types
+export * from './alarms';
+
+// API types
+export * from './api';
+
+// ESP32 types
+export * from './esp32';
+
+// ============================================
+// LEGACY TYPES (Backward Compatibility)
+// ============================================
+
+// Keep old types for backward compatibility during migration
+export interface ConnectionConfig {
+  host: string;
+  port: number;
+  timeout?: number;
+  retryAttempts?: number;
+  retryDelay?: number;
+  options?: Record<string, unknown>;
 }
 
-export enum DeviceType {
-  PLC = 'PLC',
-  RTU = 'RTU',
-  SENSOR = 'SENSOR',
-  ACTUATOR = 'ACTUATOR',
-  GATEWAY = 'GATEWAY',
-}
-
-export enum DeviceStatus {
-  ONLINE = 'ONLINE',
-  OFFLINE = 'OFFLINE',
-  ERROR = 'ERROR',
-  MAINTENANCE = 'MAINTENANCE',
-}
-
-export enum ProtocolType {
-  MODBUS_TCP = 'MODBUS_TCP',
-  MODBUS_RTU = 'MODBUS_RTU',
-  OPC_UA = 'OPC_UA',
-  MQTT = 'MQTT',
-  SNMP = 'SNMP',
-}
-
-// Tag Types
 export interface Tag {
   id: string;
   deviceId: string;
@@ -66,7 +65,6 @@ export enum TagQuality {
   UNCERTAIN = 'UNCERTAIN',
 }
 
-// Alarm Types
 export interface AlarmConfig {
   enabled: boolean;
   highHigh?: number;
@@ -76,38 +74,6 @@ export interface AlarmConfig {
   deadband?: number;
 }
 
-export interface Alarm {
-  id: string;
-  tagId: string;
-  deviceId: string;
-  severity: AlarmSeverity;
-  message: string;
-  value: TagValue;
-  threshold?: number;
-  acknowledged: boolean;
-  acknowledgedBy?: string;
-  acknowledgedAt?: Date;
-  timestamp: Date;
-}
-
-export enum AlarmSeverity {
-  CRITICAL = 'CRITICAL',
-  HIGH = 'HIGH',
-  MEDIUM = 'MEDIUM',
-  LOW = 'LOW',
-}
-
-// Connection Types
-export interface ConnectionConfig {
-  host: string;
-  port: number;
-  timeout?: number;
-  retryAttempts?: number;
-  retryDelay?: number;
-  options?: Record<string, unknown>;
-}
-
-// Real-time Event Types
 export enum EventType {
   TAG_UPDATE = 'TAG_UPDATE',
   DEVICE_STATUS = 'DEVICE_STATUS',
@@ -121,76 +87,14 @@ export interface TagUpdateEvent {
   payload: Tag;
 }
 
-export interface DeviceStatusEvent {
-  type: EventType.DEVICE_STATUS;
-  payload: {
-    deviceId: string;
-    status: DeviceStatus;
-    timestamp: Date;
-  };
-}
-
-export interface AlarmEvent {
-  type: EventType.ALARM_TRIGGERED | EventType.ALARM_ACKNOWLEDGED;
-  payload: Alarm;
-}
-
-export type ScadaEvent = TagUpdateEvent | DeviceStatusEvent | AlarmEvent;
-
-// API Response Types
-export interface ApiResponse<T = unknown> {
-  success: boolean;
-  data?: T;
-  error?: ApiError;
-  timestamp: Date;
-}
-
-export interface ApiError {
-  code: string;
-  message: string;
-  details?: Record<string, unknown>;
-}
-
-// Historical Data Types
-export interface HistoricalDataQuery {
-  tagIds: string[];
-  startTime: Date;
-  endTime: Date;
-  aggregation?: AggregationType;
-  interval?: number;
-}
-
-export enum AggregationType {
-  RAW = 'RAW',
-  AVERAGE = 'AVERAGE',
-  MIN = 'MIN',
-  MAX = 'MAX',
-  SUM = 'SUM',
-}
-
-export interface HistoricalDataPoint {
-  tagId: string;
-  value: TagValue;
-  quality: TagQuality;
-  timestamp: Date;
-}
-
-// User and Authentication Types
-export interface User {
-  id: string;
-  username: string;
-  email: string;
-  role: UserRole;
-  permissions: Permission[];
-  createdAt: Date;
-  lastLogin?: Date;
-}
-
-export enum UserRole {
-  ADMIN = 'ADMIN',
-  OPERATOR = 'OPERATOR',
-  VIEWER = 'VIEWER',
-  ENGINEER = 'ENGINEER',
+export enum ProtocolType {
+  MODBUS_TCP = 'MODBUS_TCP',
+  MODBUS_RTU = 'MODBUS_RTU',
+  OPC_UA = 'OPC_UA',
+  MQTT = 'MQTT',
+  SNMP = 'SNMP',
+  GSM_HTTP = 'GSM_HTTP',
+  GSM_MQTT = 'GSM_MQTT',
 }
 
 export enum Permission {
@@ -202,3 +106,80 @@ export enum Permission {
   MANAGE_USERS = 'MANAGE_USERS',
   SYSTEM_CONFIG = 'SYSTEM_CONFIG',
 }
+
+// ============================================
+// RE-EXPORTS FOR CONVENIENCE
+// ============================================
+
+// Device types re-export
+export type {
+  // Main device types
+  Device,
+  GSMDevice,
+  LoRaWANDevice,
+  StandardMQTTDevice,
+
+  // Device configs
+  GSMDeviceConfig,
+  LoRaWANDeviceConfig,
+  StandardMQTTDeviceConfig,
+
+  // Telemetry
+  TelemetryDataPoint,
+  TelemetryBatch,
+  TelemetryTag,
+
+  // Commands
+  DeviceCommand,
+
+  // GSM Protocol Adapter types
+  GSMConfig,
+  GSMNetworkStatus,
+  GPSLocation,
+  SMSMessage,
+  SendSMSRequest,
+  SendSMSResponse,
+  GSMCommand,
+} from './devices';
+
+export {
+  // Device enums
+  DeviceType,
+  DeviceStatus,
+  ConnectionStatus,
+  LoRaWANActivation,
+  NetworkType,
+  PowerMode,
+  CommandStatus as DeviceCommandStatus,
+  CommandType,
+
+  // GSM Protocol Adapter enums
+  SignalQuality,
+  SIMStatus,
+  SMSStatus,
+  SMSDirection,
+  GPSFixType,
+
+  // Type guards
+  isGSMDevice,
+  isLoRaWANDevice,
+  isStandardMQTTDevice,
+} from './devices';
+
+// Alarm types re-export
+export type { Alarm, AlarmDefinition, AlarmStatistics } from './alarms';
+
+export { AlarmSeverity, AlarmStatus, AlarmConditionType, NotificationChannel } from './alarms';
+
+// API types re-export
+export type {
+  ApiResponse,
+  ApiError,
+  PaginatedResponse,
+  WebSocketMessage,
+  DashboardSummary,
+  SparkplugBPayload,
+  SparkplugBMetric,
+} from './api';
+
+export { WebSocketMessageType, SparkplugBDataType } from './api';

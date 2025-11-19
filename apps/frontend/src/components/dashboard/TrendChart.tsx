@@ -90,8 +90,8 @@ export const TrendChart = ({
           });
         }
 
-        const dataPoint = timeMap.get(timestamp)!;
-        if (typeof point.value === 'number') {
+        const dataPoint = timeMap.get(timestamp);
+        if (dataPoint && typeof point.value === 'number') {
           dataPoint[tag.id] = point.value;
         }
       });

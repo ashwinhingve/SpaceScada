@@ -1,0 +1,117 @@
+# Prometheus Configuration for WebSCADA
+# Monitors all services and infrastructure
+
+global:
+  scrape_interval: 15s
+  evaluation_interval: 15s
+  external_labels:
+    cluster: 'webscada-production'
+    environment: 'production'
+
+# Alertmanager configuration (optional)
+# alerting:
+#   alertmanagers:
+#     - static_configs:
+#         - targets: ['alertmanager:9093']
+
+# Load rules once and periodically evaluate them
+# rule_files:
+#   - "alerts/*.yml"
+
+# Scrape configurations
+scrape_configs:
+  # Prometheus itself
+  - job_name: 'prometheus'
+    static_configs:
+      - targets: ['localhost:9090']
+
+  # PostgreSQL Exporter
+  - job_name: 'postgres'
+    static_configs:
+      - targets: ['postgres:5432']
+        labels:
+          service: 'postgresql'
+
+  # Redis Exporter
+  - job_name: 'redis'
+    static_configs:
+      - targets: ['redis:6379']
+        labels:
+          service: 'redis'
+
+  # InfluxDB
+  - job_name: 'influxdb'
+    static_configs:
+      - targets: ['influxdb:8086']
+        labels:
+          service: 'influxdb'
+
+  # Mosquitto MQTT Broker
+  - job_name: 'mosquitto'
+    static_configs:
+      - targets: ['mosquitto:1883']
+        labels:
+          service: 'mqtt'
+
+  # ChirpStack
+  - job_name: 'chirpstack'
+    static_configs:
+      - targets: ['chirpstack:8070']
+        labels:
+          service: 'lorawan'
+
+  # Unified API
+  - job_name: 'unified-api'
+    static_configs:
+      - targets: ['unified-api:3001']
+        labels:
+          service: 'api'
+          tier: 'backend'
+
+  # Data Pipeline
+  - job_name: 'data-pipeline'
+    static_configs:
+      - targets: ['data-pipeline:9090']
+        labels:
+          service: 'pipeline'
+          tier: 'backend'
+
+  # GSM ESP32 Gateway
+  - job_name: 'gsm-gateway'
+    static_configs:
+      - targets: ['gsm-esp32-gateway:9090']
+        labels:
+          service: 'gateway'
+          protocol: 'gsm'
+
+  # LoRaWAN Gateway
+  - job_name: 'lorawan-gateway'
+    static_configs:
+      - targets: ['lorawan-gateway:9090']
+        labels:
+          service: 'gateway'
+          protocol: 'lorawan'
+
+  # Standard MQTT Gateway
+  - job_name: 'mqtt-gateway'
+    static_configs:
+      - targets: ['mqtt-gateway:9090']
+        labels:
+          service: 'gateway'
+          protocol: 'mqtt'
+
+  # Alarm Engine
+  - job_name: 'alarm-engine'
+    static_configs:
+      - targets: ['alarm-engine:9090']
+        labels:
+          service: 'alarms'
+          tier: 'backend'
+
+  # Frontend (Next.js)
+  - job_name: 'frontend'
+    static_configs:
+      - targets: ['frontend:3000']
+        labels:
+          service: 'frontend'
+          tier: 'web'

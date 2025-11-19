@@ -44,7 +44,7 @@ export const useWebSocket = (options: UseWebSocketOptions) => {
     });
 
     socket.on('connect', () => {
-      console.log('WebSocket connected:', socket.id);
+      // WebSocket connected
       setConnectionStatus(ConnectionStatus.CONNECTED);
       resetReconnectAttempts();
 
@@ -54,8 +54,8 @@ export const useWebSocket = (options: UseWebSocketOptions) => {
       }, 30000);
     });
 
-    socket.on('disconnect', (reason) => {
-      console.log('WebSocket disconnected:', reason);
+    socket.on('disconnect', () => {
+      // WebSocket disconnected
       setConnectionStatus(ConnectionStatus.DISCONNECTED);
 
       // Clear heartbeat
@@ -69,9 +69,7 @@ export const useWebSocket = (options: UseWebSocketOptions) => {
 
       if (currentAttempts < maxReconnectAttempts) {
         const delay = getReconnectDelay(currentAttempts);
-        console.log(
-          `Reconnecting in ${delay}ms (attempt ${currentAttempts + 1}/${maxReconnectAttempts})`
-        );
+        // Reconnecting with exponential backoff
 
         reconnectTimeoutRef.current = setTimeout(() => {
           incrementReconnectAttempts();

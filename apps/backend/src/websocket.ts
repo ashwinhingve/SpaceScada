@@ -1,7 +1,7 @@
 import { FastifyInstance } from 'fastify';
 import { Server } from 'socket.io';
 import { createLogger } from '@webscada/utils';
-import { EventType, ScadaEvent } from '@webscada/shared-types';
+import { EventType, ScadaEvent, GSMEvent, GSMEventType } from '@webscada/shared-types';
 
 const logger = createLogger({ prefix: 'WebSocket' });
 
@@ -31,6 +31,36 @@ export const setupWebSocket = async (server: FastifyInstance) => {
       // TODO: Implement tag unsubscription
     });
 
+    // GSM device subscriptions
+    socket.on('subscribe:gsm', (deviceIds: string[]) => {
+      logger.info(`Client ${socket.id} subscribed to GSM devices:`, deviceIds);
+      deviceIds.forEach((deviceId) => {
+        socket.join(`gsm:${deviceId}`);
+      });
+    });
+
+    socket.on('unsubscribe:gsm', (deviceIds: string[]) => {
+      logger.info(`Client ${socket.id} unsubscribed from GSM devices:`, deviceIds);
+      deviceIds.forEach((deviceId) => {
+        socket.leave(`gsm:${deviceId}`);
+      });
+    });
+
+    // ESP32 device subscriptions
+    socket.on('subscribe:esp32', (deviceIds: string[]) => {
+      logger.info(`Client ${socket.id} subscribed to ESP32 devices:`, deviceIds);
+      deviceIds.forEach((deviceId) => {
+        socket.join(`esp32:${deviceId}`);
+      });
+    });
+
+    socket.on('unsubscribe:esp32', (deviceIds: string[]) => {
+      logger.info(`Client ${socket.id} unsubscribed from ESP32 devices:`, deviceIds);
+      deviceIds.forEach((deviceId) => {
+        socket.leave(`esp32:${deviceId}`);
+      });
+    });
+
     socket.on('error', (error) => {
       logger.error(`Socket error for ${socket.id}:`, error);
     });
@@ -56,6 +86,34 @@ export const broadcastEvent = (io: Server, event: ScadaEvent) => {
       break;
     case EventType.ALARM_ACKNOWLEDGED:
       io.emit('alarm:acknowledged', event.payload);
+      break;
+  }
+};
+
+// Helper function to broadcast GSM events
+export const broadcastGSMEvent = (io: Server, deviceId: string, event: GSMEvent) => {
+  const room = `gsm:${deviceId}`;
+
+  switch (event.type) {
+    case GSMEventType.SMS_RECEIVED:
+      io.to(room).emit('gsm:sms-received', event.payload);
+      logger.info(`Broadcasting SMS received event to room: ${room}`);
+      break;
+    case GSMEventType.SMS_SENT:
+      io.to(room).emit('gsm:sms-sent', event.payload);
+      logger.info(`Broadcasting SMS sent event to room: ${room}`);
+      break;
+    case GSMEventType.GPS_UPDATE:
+      io.to(room).emit('gsm:gps-update', event.payload);
+      logger.debug(`Broadcasting GPS update event to room: ${room}`);
+      break;
+    case GSMEventType.NETWORK_STATUS_UPDATE:
+      io.to(room).emit('gsm:network-status', event.payload);
+      logger.debug(`Broadcasting network status event to room: ${room}`);
+      break;
+    case GSMEventType.COMMAND_RESPONSE:
+      io.to(room).emit('gsm:command-response', event.payload);
+      logger.info(`Broadcasting command response event to room: ${room}`);
       break;
   }
 };

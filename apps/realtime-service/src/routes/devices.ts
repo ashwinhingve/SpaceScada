@@ -14,8 +14,6 @@ export const deviceRoutes = async (
     '/devices',
     {
       schema: {
-        description: 'Get all devices with current values',
-        tags: ['devices'],
         response: {
           200: {
             type: 'object',
@@ -46,8 +44,6 @@ export const deviceRoutes = async (
     '/devices/:id',
     {
       schema: {
-        description: 'Get device by ID',
-        tags: ['devices'],
         params: {
           type: 'object',
           properties: {
@@ -76,8 +72,6 @@ export const deviceRoutes = async (
     '/devices/:id/data',
     {
       schema: {
-        description: 'Get device data including history',
-        tags: ['devices'],
         params: {
           type: 'object',
           properties: {
@@ -130,8 +124,6 @@ export const deviceRoutes = async (
     '/devices/:id/value',
     {
       schema: {
-        description: 'Update device tag value',
-        tags: ['devices'],
         params: {
           type: 'object',
           properties: {

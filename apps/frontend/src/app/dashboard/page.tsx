@@ -1,20 +1,36 @@
 'use client';
 
+import dynamic from 'next/dynamic';
 import { useEffect, useMemo, useState } from 'react';
+import { Activity, AlertCircle, Cpu, Database, Server } from 'lucide-react';
 
-import { DataCard } from '@/components/dashboard/DataCard';
-import { DeviceStatus } from '@/components/dashboard/DeviceStatus';
-import { MetricGauge } from '@/components/dashboard/MetricGauge';
-import { TrendChart } from '@/components/dashboard/TrendChart';
+import { AreaChart } from '@/components/dashboard/charts/AreaChart';
+import { BarChart } from '@/components/dashboard/charts/BarChart';
+import { GaugeChart } from '@/components/dashboard/charts/GaugeChart';
+import { PieChart } from '@/components/dashboard/charts/PieChart';
+import { DeviceTypeConfig, DeviceTypeToggles } from '@/components/dashboard/DeviceTypeToggles';
+import { Notification, NotificationsPanel } from '@/components/dashboard/NotificationsPanel';
+import { QuickActions } from '@/components/dashboard/QuickActions';
+import { StatCard, StatCards } from '@/components/dashboard/StatCards';
+import { TopEntities } from '@/components/dashboard/TopEntities';
 import { Header } from '@/components/layout/Header';
 import { Sidebar } from '@/components/layout/Sidebar';
 import { useWebSocket } from '@/hooks/useWebSocket';
 import { useDashboardStore } from '@/store/dashboard-store';
 
+// Dynamic import for map component (SSR issue with Leaflet)
+const DeviceMap = dynamic(
+  () => import('@/components/dashboard/DeviceMap').then((mod) => mod.DeviceMap),
+  { ssr: false }
+);
+
 export default function DashboardPage() {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+  const [enabledDeviceTypes, setEnabledDeviceTypes] = useState<Set<string>>(
+    new Set(['plc', 'sensor', 'actuator', 'gateway'])
+  );
 
-  const { devices, selectedDeviceId, tagHistory, setDevices } = useDashboardStore();
+  const { devices, setDevices } = useDashboardStore();
 
   // Initialize WebSocket connection
   const { subscribe, unsubscribe } = useWebSocket({
@@ -59,27 +75,176 @@ export default function DashboardPage() {
       }
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [deviceIds.length]); // Only resubscribe if number of devices changes
-
-  const selectedDevice = useMemo(() => {
-    return selectedDeviceId ? devices.get(selectedDeviceId) : null;
-  }, [selectedDeviceId, devices]);
+  }, [deviceIds.length]);
 
   const deviceList = useMemo(() => {
     return Array.from(devices.values());
   }, [devices]);
 
-  const allDevicesOnlineCount = useMemo(() => {
-    return deviceList.filter((d) => d.status === 'ONLINE').length;
-  }, [deviceList]);
+  const filteredDevices = useMemo(() => {
+    return deviceList.filter((d) => enabledDeviceTypes.has(d.type));
+  }, [deviceList, enabledDeviceTypes]);
 
-  const allDevicesOfflineCount = useMemo(() => {
-    return deviceList.filter((d) => d.status === 'OFFLINE').length;
-  }, [deviceList]);
+  const onlineCount = useMemo(() => {
+    return filteredDevices.filter((d) => d.status === 'ONLINE').length;
+  }, [filteredDevices]);
 
-  const allDevicesErrorCount = useMemo(() => {
-    return deviceList.filter((d) => d.status === 'ERROR').length;
-  }, [deviceList]);
+  const offlineCount = useMemo(() => {
+    return filteredDevices.filter((d) => d.status === 'OFFLINE').length;
+  }, [filteredDevices]);
+
+  const errorCount = useMemo(() => {
+    return filteredDevices.filter((d) => d.status === 'ERROR').length;
+  }, [filteredDevices]);
+
+  // Convert devices to entities for TopEntities component
+  const entities = useMemo(() => {
+    return filteredDevices.map((device) => ({
+      id: device.id,
+      name: device.name,
+      type: device.type === 'gateway' ? ('gateway' as const) : ('device' as const),
+      status:
+        device.status === 'ONLINE'
+          ? 'Connected'
+          : device.status === 'OFFLINE'
+            ? 'Disconnected'
+            : 'No recent activity',
+      lastSeen: device.lastUpdate ? new Date(device.lastUpdate).toLocaleString() : undefined,
+    }));
+  }, [filteredDevices]);
+
+  // Device type toggles configuration
+  const deviceTypeConfigs: DeviceTypeConfig[] = useMemo(() => {
+    const types = [
+      { id: 'plc', label: 'PLC', icon: '🖥️', color: '#3b82f6' },
+      { id: 'sensor', label: 'Sensors', icon: '📡', color: '#10b981' },
+      { id: 'actuator', label: 'Actuators', icon: '⚙️', color: '#f59e0b' },
+      { id: 'gateway', label: 'Gateways', icon: '🌐', color: '#8b5cf6' },
+    ];
+
+    return types.map((type) => ({
+      ...type,
+      count: deviceList.filter((d) => d.type === type.id).length,
+      enabled: enabledDeviceTypes.has(type.id),
+    }));
+  }, [deviceList, enabledDeviceTypes]);
+
+  const handleDeviceTypeToggle = (id: string, enabled: boolean) => {
+    setEnabledDeviceTypes((prev) => {
+      const newSet = new Set(prev);
+      if (enabled) {
+        newSet.add(id);
+      } else {
+        newSet.delete(id);
+      }
+      return newSet;
+    });
+  };
+
+  // Device locations for map
+  const deviceLocations = useMemo(() => {
+    return filteredDevices.map((device) => ({
+      id: device.id,
+      name: device.name,
+      lat: 20.5937 + (Math.random() - 0.5) * 10, // Random coordinates around India
+      lng: 78.9629 + (Math.random() - 0.5) * 10,
+      status:
+        device.status === 'ONLINE'
+          ? ('connected' as const)
+          : device.status === 'ERROR'
+            ? ('error' as const)
+            : ('disconnected' as const),
+      type: device.type,
+      lastSeen: device.lastUpdate ? new Date(device.lastUpdate).toLocaleString() : undefined,
+    }));
+  }, [filteredDevices]);
+
+  // Mock notifications (replace with real data)
+  const notifications: Notification[] = [
+    {
+      id: '1',
+      title: 'New API key created for application',
+      message: 'A new API key has just been created for your application...',
+      timestamp: new Date(Date.now() - 300000),
+      type: 'info',
+      read: false,
+    },
+  ];
+
+  // Statistics cards
+  const statCards: StatCard[] = [
+    {
+      id: 'total',
+      label: 'Total Devices',
+      value: filteredDevices.length,
+      icon: Server,
+      color: '#3b82f6',
+      bgColor: '#3b82f6',
+    },
+    {
+      id: 'online',
+      label: 'Online',
+      value: onlineCount,
+      icon: Activity,
+      color: '#10b981',
+      bgColor: '#10b981',
+    },
+    {
+      id: 'offline',
+      label: 'Offline',
+      value: offlineCount,
+      icon: AlertCircle,
+      color: '#6b7280',
+      bgColor: '#6b7280',
+    },
+    {
+      id: 'errors',
+      label: 'Errors',
+      value: errorCount,
+      icon: AlertCircle,
+      color: '#ef4444',
+      bgColor: '#ef4444',
+    },
+    {
+      id: 'cpu',
+      label: 'Avg CPU',
+      value: '42%',
+      icon: Cpu,
+      color: '#f59e0b',
+      bgColor: '#f59e0b',
+    },
+    {
+      id: 'data',
+      label: 'Data Rate',
+      value: '1.2k',
+      icon: Database,
+      color: '#8b5cf6',
+      bgColor: '#8b5cf6',
+      unit: 'msg/s',
+    },
+  ];
+
+  // Chart data
+  const deviceStatusData = [
+    { name: 'Online', value: onlineCount },
+    { name: 'Offline', value: offlineCount },
+    { name: 'Error', value: errorCount },
+  ];
+
+  const deviceTypeData = useMemo(() => {
+    return deviceTypeConfigs.map((config) => ({
+      name: config.label,
+      value: config.count,
+    }));
+  }, [deviceTypeConfigs]);
+
+  const trendData = useMemo(() => {
+    return Array.from({ length: 24 }, (_, i) => ({
+      name: `${i}:00`,
+      online: Math.floor(Math.random() * onlineCount) + 1,
+      offline: Math.floor(Math.random() * offlineCount),
+    }));
+  }, [onlineCount, offlineCount]);
 
   return (
     <div className="min-h-screen bg-background">
@@ -88,136 +253,82 @@ export default function DashboardPage() {
       <div className="flex">
         <Sidebar isOpen={isSidebarOpen} onClose={() => setIsSidebarOpen(false)} />
 
-        <main className="flex-1 p-4 lg:p-6 overflow-auto">
-          {/* Overview section */}
-          <div className="mb-6">
-            <h2 className="text-2xl font-bold mb-4">System Overview</h2>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-              <div className="bg-card border rounded-lg p-4">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="text-sm text-muted-foreground">Total Devices</p>
-                    <p className="text-3xl font-bold">{deviceList.length}</p>
-                  </div>
-                  <div className="h-12 w-12 rounded-full bg-primary/10 flex items-center justify-center">
-                    <span className="text-2xl">🔌</span>
-                  </div>
-                </div>
+        <main className="flex-1 p-4 lg:p-6 overflow-auto space-y-6">
+          {/* Quick Actions */}
+          <div>
+            <h2 className="text-sm font-medium text-muted-foreground mb-4">Home › Dashboard</h2>
+            <QuickActions />
+          </div>
+
+          {/* Statistics Cards */}
+          <StatCards stats={statCards} />
+
+          {/* Device Type Toggles */}
+          <DeviceTypeToggles deviceTypes={deviceTypeConfigs} onToggle={handleDeviceTypeToggle} />
+
+          {/* Main Content Grid */}
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            {/* Left Column - Top Entities (2/3 width) */}
+            <div className="lg:col-span-2 space-y-6">
+              <TopEntities entities={entities} />
+
+              {/* Charts Row */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <PieChart
+                  data={deviceStatusData}
+                  title="Device Status Distribution"
+                  colors={['#10b981', '#6b7280', '#ef4444']}
+                  height={250}
+                />
+                <PieChart
+                  data={deviceTypeData}
+                  title="Device Types"
+                  innerRadius={60}
+                  height={250}
+                />
               </div>
 
-              <div className="bg-card border rounded-lg p-4">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="text-sm text-muted-foreground">Online</p>
-                    <p className="text-3xl font-bold text-green-600">{allDevicesOnlineCount}</p>
-                  </div>
-                  <div className="h-12 w-12 rounded-full bg-green-500/10 flex items-center justify-center">
-                    <span className="text-2xl">✓</span>
-                  </div>
-                </div>
-              </div>
+              {/* Area Chart */}
+              <AreaChart
+                data={trendData}
+                dataKeys={['online', 'offline']}
+                title="24-Hour Device Status Trend"
+                colors={['#10b981', '#ef4444']}
+                height={300}
+              />
 
-              <div className="bg-card border rounded-lg p-4">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="text-sm text-muted-foreground">Offline</p>
-                    <p className="text-3xl font-bold text-gray-600">{allDevicesOfflineCount}</p>
-                  </div>
-                  <div className="h-12 w-12 rounded-full bg-gray-500/10 flex items-center justify-center">
-                    <span className="text-2xl">○</span>
-                  </div>
-                </div>
-              </div>
+              {/* Bar Chart */}
+              <BarChart
+                data={deviceTypeConfigs.map((c) => ({
+                  name: c.label,
+                  count: c.count,
+                }))}
+                dataKeys={['count']}
+                title="Devices by Type"
+                colors={['#3b82f6']}
+                height={250}
+              />
+            </div>
 
-              <div className="bg-card border rounded-lg p-4">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="text-sm text-muted-foreground">Errors</p>
-                    <p className="text-3xl font-bold text-red-600">{allDevicesErrorCount}</p>
-                  </div>
-                  <div className="h-12 w-12 rounded-full bg-red-500/10 flex items-center justify-center">
-                    <span className="text-2xl">⚠</span>
-                  </div>
-                </div>
-              </div>
+            {/* Right Column - Notifications (1/3 width) */}
+            <div className="space-y-6">
+              <NotificationsPanel notifications={notifications} />
+
+              {/* System Health Gauge */}
+              <GaugeChart
+                value={(onlineCount / filteredDevices.length) * 100 || 0}
+                title="System Health"
+                unit="%"
+                min={0}
+                max={100}
+                thresholds={{ warning: 70, danger: 50 }}
+                size={200}
+              />
             </div>
           </div>
 
-          {/* System health gauge */}
-          {deviceList.length > 0 && (
-            <div className="mb-6">
-              <h2 className="text-2xl font-bold mb-4">System Health</h2>
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                <MetricGauge
-                  title="Device Availability"
-                  value={allDevicesOnlineCount}
-                  max={deviceList.length}
-                  unit="%"
-                  description="Percentage of devices online"
-                  thresholds={{ warning: 80, danger: 60 }}
-                />
-              </div>
-            </div>
-          )}
-
-          {/* Selected device details */}
-          {selectedDevice ? (
-            <div className="space-y-6">
-              <div>
-                <h2 className="text-2xl font-bold mb-4">Device Details</h2>
-                <DeviceStatus device={selectedDevice} variant="detailed" />
-              </div>
-
-              {/* Tag data cards */}
-              {selectedDevice.tags.length > 0 && (
-                <div>
-                  <h3 className="text-xl font-semibold mb-4">Real-time Data</h3>
-                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                    {selectedDevice.tags.map((tag) => (
-                      <DataCard key={tag.id} tag={tag} history={tagHistory.get(tag.id) || []} />
-                    ))}
-                  </div>
-                </div>
-              )}
-
-              {/* Trend charts */}
-              {selectedDevice.tags.length > 0 && (
-                <div>
-                  <h3 className="text-xl font-semibold mb-4">Trends</h3>
-                  <TrendChart
-                    title={`${selectedDevice.name} - Data Trends`}
-                    description="Real-time data visualization"
-                    tags={selectedDevice.tags}
-                    history={tagHistory}
-                    height={400}
-                  />
-                </div>
-              )}
-            </div>
-          ) : (
-            <div className="flex flex-col items-center justify-center py-16 text-center">
-              <div className="w-16 h-16 rounded-full bg-muted flex items-center justify-center mb-4">
-                <span className="text-3xl">📊</span>
-              </div>
-              <h3 className="text-lg font-semibold mb-2">No Device Selected</h3>
-              <p className="text-muted-foreground max-w-md">
-                Select a device from the sidebar to view its real-time data, trends, and status
-                information.
-              </p>
-            </div>
-          )}
-
-          {/* All devices grid when no device selected */}
-          {!selectedDevice && deviceList.length > 0 && (
-            <div className="mt-6">
-              <h2 className="text-2xl font-bold mb-4">All Devices</h2>
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                {deviceList.map((device) => (
-                  <DeviceStatus key={device.id} device={device} variant="detailed" />
-                ))}
-              </div>
-            </div>
-          )}
+          {/* Map Section */}
+          <DeviceMap devices={deviceLocations} center={[20.5937, 78.9629]} zoom={5} />
         </main>
       </div>
     </div>

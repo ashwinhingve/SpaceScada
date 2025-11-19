@@ -19,7 +19,8 @@
   },
   "dependencies": {
     "@webscada/shared-types": "workspace:*",
-    "@webscada/utils": "workspace:*"
+    "@webscada/utils": "workspace:*",
+    "mqtt": "^5.14.1"
   },
   "devDependencies": {
     "@types/node": "^20.10.0",

@@ -6,7 +6,7 @@ export const errorHandler = (
   error: FastifyError,
   request: FastifyRequest,
   reply: FastifyReply
-) => {
+): void => {
   logError('Request error', error, {
     url: request.url,
     method: request.method,
@@ -24,7 +24,7 @@ export const errorHandler = (
     timestamp: new Date(),
   };
 
-  reply.status(statusCode).send(response);
+  void reply.status(statusCode).send(response);
 };
 
 export const createErrorResponse = (

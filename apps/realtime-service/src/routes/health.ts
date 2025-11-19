@@ -7,8 +7,6 @@ export const healthRoutes = async (fastify: FastifyInstance, getConnectionCount:
     '/health',
     {
       schema: {
-        description: 'Health check endpoint',
-        tags: ['health'],
         response: {
           200: {
             type: 'object',
@@ -30,7 +28,7 @@ export const healthRoutes = async (fastify: FastifyInstance, getConnectionCount:
         },
       },
     },
-    async (request, reply) => {
+    async (_request, reply) => {
       const memoryUsage = process.memoryUsage();
       const totalMemory = memoryUsage.heapTotal;
       const usedMemory = memoryUsage.heapUsed;

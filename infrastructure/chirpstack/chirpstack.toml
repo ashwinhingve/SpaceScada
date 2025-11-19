@@ -1,0 +1,97 @@
+# ChirpStack LoRaWAN Network Server Configuration
+# WebSCADA Production - IEC 62443 Compliant
+
+[logging]
+level = "info"
+json = true
+
+[postgresql]
+dsn = "postgres://webscada:CHANGE_ME@postgres/webscada?sslmode=disable"
+automigrate = true
+max_open_connections = 10
+
+[redis]
+servers = ["redis://:CHANGE_ME@redis:6379/1"]
+cluster = false
+max_active = 100
+
+[network]
+enabled_regions = ["eu868", "us915"]
+net_id = "000000"
+
+[api]
+bind = "0.0.0.0:8080"
+secret = "CHANGE_ME_API_SECRET_MIN_32_CHARS"
+
+[monitoring]
+enabled = true
+bind = "0.0.0.0:8070"
+prometheus_endpoint = true
+
+[gateway]
+ca_cert = ""
+ca_key = ""
+client_cert_lifetime = "365d"
+
+[integration]
+enabled = ["mqtt"]
+
+[integration.mqtt]
+server = "tcp://mosquitto:1883"
+username = "chirpstack"
+password = "CHANGE_ME"
+clean_session = true
+qos = 0
+json = true
+
+[integration.mqtt.event_topic_template]
+topic = "application/{{application_id}}/device/{{dev_eui}}/event/{{event}}"
+
+[integration.mqtt.command_topic_template]
+topic = "application/{{application_id}}/device/{{dev_eui}}/command/{{command}}"
+
+[regions.eu868]
+name = "EU868"
+
+[[regions.eu868.channels]]
+frequency = 868100000
+min_dr = 0
+max_dr = 5
+
+[[regions.eu868.channels]]
+frequency = 868300000
+min_dr = 0
+max_dr = 5
+
+[[regions.eu868.channels]]
+frequency = 868500000
+min_dr = 0
+max_dr = 5
+
+[regions.us915]
+name = "US915"
+
+[[regions.us915.channels]]
+frequency = 902300000
+min_dr = 0
+max_dr = 3
+
+[[regions.us915.channels]]
+frequency = 902500000
+min_dr = 0
+max_dr = 3
+
+[[regions.us915.channels]]
+frequency = 902700000
+min_dr = 0
+max_dr = 3
+
+[join_server]
+enabled = false
+
+[codec]
+js_max_execution_time = "100ms"
+
+[user_authentication]
+enabled = true
+openid_connect = false

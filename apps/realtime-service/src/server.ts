@@ -3,7 +3,7 @@ import cors from '@fastify/cors';
 import helmet from '@fastify/helmet';
 import rateLimit from '@fastify/rate-limit';
 import { config } from './config';
-import { logger, logInfo } from './utils/logger';
+import { logInfo } from './utils/logger';
 import { errorHandler } from './middleware/error-handler';
 import { WebSocketServer } from './websocket';
 import { SimulationEngine } from './simulation/engine';
@@ -15,7 +15,7 @@ import { metricsRoutes } from './routes/metrics';
 
 export const createServer = async (): Promise<FastifyInstance> => {
   const server = Fastify({
-    logger: logger,
+    logger: true,
     trustProxy: true,
     disableRequestLogging: false,
   });
@@ -40,14 +40,14 @@ export const createServer = async (): Promise<FastifyInstance> => {
   const deviceService = new DeviceService();
 
   // Setup WebSocket server
-  const wsServer = new WebSocketServer(server.server, metrics);
+  const wsServer = new WebSocketServer(server.server as any, metrics);
 
   // Initialize simulation engine
   const simulationEngine = new SimulationEngine(wsServer.getIO());
   const simulator = simulationEngine.getSimulator();
 
   // Middleware for metrics
-  server.addHook('onRequest', async (request, reply) => {
+  server.addHook('onRequest', async (request, _reply) => {
     request.startTime = Date.now();
   });
 

@@ -26,7 +26,20 @@
       "Bash(mkdir:*)",
       "Bash(apps/frontend/public/.gitkeep)",
       "Bash(pnpm lint-staged --version)",
-      "Bash(git add -A)"
+      "Bash(git add -A)",
+      "Bash(git commit --no-verify -m \"Kubernetes Deployment for MVP\")",
+      "Bash(pnpm remove:*)",
+      "Bash(pnpm dev:*)",
+      "Bash(docker-compose ps:*)",
+      "Bash(pnpm list:*)",
+      "WebFetch(domain:github.com)",
+      "WebSearch",
+      "WebFetch(domain:raw.githubusercontent.com)",
+      "WebFetch(domain:api.github.com)",
+      "Bash(cd /mnt/d/Do\\ Not\\ Open/project/webscada && find:*)",
+      "Bash(find:*)",
+      "Bash(git commit:*)",
+      "Bash(git push:*)"
     ],
     "deny": [],
     "ask": []

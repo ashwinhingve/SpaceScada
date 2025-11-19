@@ -1,4 +1,4 @@
-import { Device, DataPoint, DeviceTag } from '../types';
+import { DataPoint, DeviceTag } from '../types';
 import { config } from '../config';
 
 export class DeviceService {
@@ -30,7 +30,7 @@ export class DeviceService {
     }
   }
 
-  getDeviceHistory(deviceId: string, tags: DeviceTag[]): Map<string, DataPoint[]> {
+  getDeviceHistory(_deviceId: string, tags: DeviceTag[]): Map<string, DataPoint[]> {
     const result = new Map<string, DataPoint[]>();
 
     tags.forEach((tag) => {

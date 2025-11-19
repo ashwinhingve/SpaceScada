@@ -4,6 +4,58 @@
 
 @layer base {
   :root {
+    /* Dark theme by default - The Things Stack inspired */
+    --background: 222 47% 11%;
+    --foreground: 210 40% 98%;
+    --card: 224 47% 14%;
+    --card-foreground: 210 40% 98%;
+    --popover: 224 47% 14%;
+    --popover-foreground: 210 40% 98%;
+    --primary: 217 91% 60%;
+    --primary-foreground: 0 0% 100%;
+    --secondary: 224 30% 20%;
+    --secondary-foreground: 210 40% 98%;
+    --muted: 224 30% 20%;
+    --muted-foreground: 215 20% 65%;
+    --accent: 224 40% 25%;
+    --accent-foreground: 210 40% 98%;
+    --destructive: 0 85% 60%;
+    --destructive-foreground: 0 0% 100%;
+    --border: 224 30% 25%;
+    --input: 224 30% 22%;
+    --ring: 217 91% 60%;
+    --radius: 0.5rem;
+
+    /* Status colors for SCADA */
+    --success: 142 76% 36%;
+    --warning: 38 92% 50%;
+    --error: 0 85% 60%;
+    --info: 199 89% 48%;
+  }
+
+  .dark {
+    --background: 222 47% 11%;
+    --foreground: 210 40% 98%;
+    --card: 224 47% 14%;
+    --card-foreground: 210 40% 98%;
+    --popover: 224 47% 14%;
+    --popover-foreground: 210 40% 98%;
+    --primary: 217 91% 60%;
+    --primary-foreground: 0 0% 100%;
+    --secondary: 224 30% 20%;
+    --secondary-foreground: 210 40% 98%;
+    --muted: 224 30% 20%;
+    --muted-foreground: 215 20% 65%;
+    --accent: 224 40% 25%;
+    --accent-foreground: 210 40% 98%;
+    --destructive: 0 85% 60%;
+    --destructive-foreground: 0 0% 100%;
+    --border: 224 30% 25%;
+    --input: 224 30% 22%;
+    --ring: 217 91% 60%;
+  }
+
+  .light {
     --background: 0 0% 100%;
     --foreground: 222.2 84% 4.9%;
     --card: 0 0% 100%;
@@ -23,29 +75,6 @@
     --border: 214.3 31.8% 91.4%;
     --input: 214.3 31.8% 91.4%;
     --ring: 221.2 83.2% 53.3%;
-    --radius: 0.5rem;
-  }
-
-  .dark {
-    --background: 222.2 84% 4.9%;
-    --foreground: 210 40% 98%;
-    --card: 222.2 84% 4.9%;
-    --card-foreground: 210 40% 98%;
-    --popover: 222.2 84% 4.9%;
-    --popover-foreground: 210 40% 98%;
-    --primary: 217.2 91.2% 59.8%;
-    --primary-foreground: 222.2 47.4% 11.2%;
-    --secondary: 217.2 32.6% 17.5%;
-    --secondary-foreground: 210 40% 98%;
-    --muted: 217.2 32.6% 17.5%;
-    --muted-foreground: 215 20.2% 65.1%;
-    --accent: 217.2 32.6% 17.5%;
-    --accent-foreground: 210 40% 98%;
-    --destructive: 0 62.8% 30.6%;
-    --destructive-foreground: 210 40% 98%;
-    --border: 217.2 32.6% 17.5%;
-    --input: 217.2 32.6% 17.5%;
-    --ring: 224.3 76.3% 48%;
   }
 }
 

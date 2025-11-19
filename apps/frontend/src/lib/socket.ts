@@ -24,15 +24,15 @@ class SocketService {
     });
 
     this.socket.on('connect', () => {
-      console.log('Connected to WebSocket server');
+      // Connected to WebSocket server
     });
 
     this.socket.on('disconnect', () => {
-      console.log('Disconnected from WebSocket server');
+      // Disconnected from WebSocket server
     });
 
-    this.socket.on('error', (error: Error) => {
-      console.error('WebSocket error:', error);
+    this.socket.on('error', () => {
+      // WebSocket error occurred
     });
   }
 

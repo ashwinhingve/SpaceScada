@@ -1,16 +1,12 @@
 {
   "$schema": "https://turbo.build/schema.json",
   "globalDependencies": ["**/.env.*local"],
+  "globalEnv": ["NODE_ENV"],
   "pipeline": {
     "build": {
       "dependsOn": ["^build"],
       "outputs": [".next/**", "!.next/cache/**", "dist/**"],
-      "env": [
-        "NEXT_PUBLIC_API_URL",
-        "NEXT_PUBLIC_WS_URL",
-        "DATABASE_URL",
-        "REDIS_URL"
-      ]
+      "env": ["NEXT_PUBLIC_API_URL", "NEXT_PUBLIC_WS_URL", "DATABASE_URL", "REDIS_URL"]
     },
     "dev": {
       "cache": false,
@@ -18,19 +14,23 @@
     },
     "start": {
       "dependsOn": ["build"],
-      "cache": false
+      "cache": false,
+      "persistent": true
     },
     "lint": {
-      "outputs": []
+      "outputs": [],
+      "cache": true
     },
     "type-check": {
       "dependsOn": ["^build"],
-      "outputs": []
+      "outputs": ["*.tsbuildinfo"],
+      "cache": true
     },
     "test": {
       "dependsOn": ["^build"],
       "outputs": ["coverage/**"],
-      "inputs": ["src/**/*.tsx", "src/**/*.ts", "test/**/*.ts", "test/**/*.tsx"]
+      "inputs": ["src/**/*.tsx", "src/**/*.ts", "test/**/*.ts", "test/**/*.tsx"],
+      "cache": true
     },
     "clean": {
       "cache": false
