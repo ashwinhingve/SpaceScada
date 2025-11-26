@@ -6,8 +6,8 @@
     "dev": "next dev",
     "build": "node build.js",
     "start": "pnpx next start",
-    "lint": "pnpx next lint",
-    "type-check": "tsc --noEmit",
+    "lint": "node lint.js",
+    "type-check": "node type-check.js",
     "clean": "rm -rf .next"
   },
   "dependencies": {
