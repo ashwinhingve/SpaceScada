@@ -24,7 +24,7 @@ export function ControlPanel({ device }: ControlPanelProps) {
     }
   };
 
-  const ledState = device.controlState?.ledState ?? false;
+  const ledState = (device as any).controlState?.ledState ?? false;
 
   return (
     <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-6">

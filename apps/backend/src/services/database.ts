@@ -56,6 +56,10 @@ export class DatabaseService {
     return this.pool.connect();
   }
 
+  getPool(): Pool {
+    return this.pool;
+  }
+
   async close(): Promise<void> {
     await this.pool.end();
     logger.info('Database connection closed');

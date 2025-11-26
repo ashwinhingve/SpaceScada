@@ -10,7 +10,7 @@ A modern, cloud-native SCADA (Supervisory Control and Data Acquisition) system b
 - **Real-time**: Socket.io, WebSocket
 - **Database**: PostgreSQL, Redis
 - **Container**: Docker
-- **Orchestration**: Kubernetes
+- **Orchestration**: K3s
 - **Build System**: Turbo for fast, efficient builds
 
 ## Project Structure
@@ -27,15 +27,26 @@ webscada/
 ├── packages/                  # Shared packages
 │   ├── shared-types/         # Shared TypeScript types
 │   ├── utils/                # Common utilities
-│   └── protocols/            # Protocol implementations (Modbus, MQTT, OPC-UA, GSM)
+│   └── protocols/            # Protocol implementations (LoRaWAN, GSM, Wi-Fi, Bluetooth)
 ├── infrastructure/            # Deployment configs
-│   ├── k8s/                  # Kubernetes manifests
+│   ├── k8s/                  # K3s manifests
 │   ├── docker/               # Dockerfiles
 │   └── helm/                 # Helm charts
-├── firmware/                  # Embedded firmware (separate from monorepo)
+├── documents/                 # All project documentation
+│   ├── architecture/         # System architecture docs
+│   ├── developer-guides/     # Development guides
+│   ├── api/                  # API documentation
+│   ├── operations/           # Deployment and operations
+│   ├── user-guides/          # End-user documentation
+│   ├── migrations/           # Change history
+│   └── assets/               # Diagrams and images
+├── firmware/                  # Embedded firmware
 │   └── esp32/                # ESP32 Arduino firmware
 ├── scripts/                   # Automation scripts
-└── turbo.json                # Turborepo configuration
+├── tests/                     # Integration tests
+├── docker-compose.yml         # Local development
+├── skaffold.yaml             # K8s development workflow
+└── package.json              # Monorepo config (pnpm workspaces)
 ```
 
 ## Prerequisites
@@ -43,7 +54,7 @@ webscada/
 - Node.js >= 18.0.0
 - pnpm >= 8.0.0
 - Docker & Docker Compose
-- Kubernetes cluster (for production deployment)
+- K3s cluster (for production deployment)
 
 ## Getting Started
 
@@ -125,10 +136,10 @@ pnpm docker:up
 pnpm docker:down
 ```
 
-### Kubernetes Deployment
+### K3s Deployment
 
 ```bash
-# Deploy to Kubernetes
+# Deploy to K3s
 pnpm k8s:deploy
 
 # Or use Skaffold for development
@@ -162,14 +173,15 @@ pnpm test
 
 ## Documentation
 
-All project documentation is organized in the `/docs` directory:
+All project documentation is organized in the `/documents` directory:
 
-- **[Architecture](./docs/architecture/)** - System design and architecture
-- **[Deployment](./docs/deployment/)** - Deployment guides and procedures
-- **[Development](./docs/development/)** - Development guidelines and verification reports
-- **[Guides](./docs/guides/)** - Integration guides for ESP32, GSM, and other devices
-- **[Frontend](./docs/frontend/)** - Frontend-specific documentation
-- **[Infrastructure](./docs/infrastructure/)** - Infrastructure setup and troubleshooting
+- **[Documentation Index](./documents/README.md)** - Complete documentation navigation
+- **[Architecture](./documents/architecture/)** - System design and architecture
+- **[Developer Guides](./documents/developer-guides/)** - Setup, coding standards, and contribution guidelines
+- **[API Documentation](./documents/api/)** - API endpoints and authentication
+- **[Operations](./documents/operations/)** - Deployment, backup, and infrastructure management
+- **[User Guides](./documents/user-guides/)** - Frontend usage and features
+- **[Migrations](./documents/migrations/)** - Change history and migration notes
 
 For AI assistant onboarding, see [CLAUDE.md](./claude.md).
 

@@ -1,7 +1,6 @@
 'use client';
 
 import Link from 'next/link';
-import { MainLayout } from '@/components/MainLayout';
 import { Button } from '@/components/ui/button';
 import { motion, useScroll, useTransform, useSpring } from 'framer-motion';
 import {
@@ -15,16 +14,23 @@ import {
   ChevronDown,
   Gauge,
   Radio,
-  Cpu,
-  BarChart,
   Database,
   Bell,
   Lock,
   Wifi,
+  Code2,
+  Sparkles,
+  Target,
+  Rocket,
 } from 'lucide-react';
 import { useEffect, useRef, useState } from 'react';
 import { AnimatedElement, AnimatedContainer } from '@/components/ui/animated-element';
 import { AnimatedParticles } from '@/components/AnimatedParticles';
+import { EnhancedNavBar } from '@/components/EnhancedNavBar';
+import { AnimatedCounter } from '@/components/AnimatedCounter';
+import { TypewriterText } from '@/components/TypewriterText';
+import { ShowcaseSection } from '@/components/ShowcaseSection';
+import { EnhancedFeatureCard } from '@/components/EnhancedFeatureCard';
 
 // Features data
 const features = [
@@ -34,6 +40,7 @@ const features = [
       'Monitor industrial devices with millisecond precision and instant alerts for critical events.',
     icon: <Zap className="h-8 w-8 text-blue-400" />,
     gradient: 'from-blue-500 to-cyan-400',
+    href: '/console/dashboard',
   },
   {
     title: 'Advanced Analytics',
@@ -41,6 +48,7 @@ const features = [
       'Visualize trends, detect anomalies, and optimize operations with powerful data analytics.',
     icon: <LineChart className="h-8 w-8 text-purple-400" />,
     gradient: 'from-purple-500 to-pink-400',
+    href: '/console/dashboard',
   },
   {
     title: 'Enterprise Security',
@@ -48,6 +56,7 @@ const features = [
       'Bank-level encryption with role-based access control and comprehensive audit trails.',
     icon: <Shield className="h-8 w-8 text-green-400" />,
     gradient: 'from-green-500 to-emerald-400',
+    href: '/console/dashboard',
   },
   {
     title: 'Cloud-Native',
@@ -55,6 +64,7 @@ const features = [
       'Scalable cloud infrastructure with 99.9% uptime and automatic failover capabilities.',
     icon: <Cloud className="h-8 w-8 text-cyan-400" />,
     gradient: 'from-cyan-500 to-blue-400',
+    href: '/console/dashboard',
   },
 ];
 
@@ -134,23 +144,24 @@ const stats = [
   { value: '24/7', label: 'Support' },
 ];
 
+// Rotating words for typewriter
+const rotatingWords = [
+  'Industrial IoT',
+  'Real-time Monitoring',
+  'Smart Manufacturing',
+  'Process Automation',
+];
+
 export default function HomePage() {
   const heroRef = useRef<HTMLElement>(null);
-  const featuresRef = useRef<HTMLElement>(null);
-  const solutionsRef = useRef<HTMLElement>(null);
-  const testimonialsRef = useRef<HTMLElement>(null);
-  const ctaRef = useRef<HTMLElement>(null);
-
   const { scrollY, scrollYProgress } = useScroll();
   const smoothScrollY = useSpring(scrollY, { damping: 50, stiffness: 400 });
   const smoothProgress = useSpring(scrollYProgress, { damping: 50, stiffness: 400 });
 
   const y = useTransform(smoothScrollY, [0, 500], [0, -100]);
-  const scale = useTransform(smoothProgress, [0, 0.2], [1, 0.95]);
   const heroOpacity = useTransform(smoothProgress, [0, 0.25], [1, 0]);
   const parallax1 = useTransform(smoothScrollY, [0, 1000], [0, -300]);
   const parallax2 = useTransform(smoothScrollY, [0, 1000], [0, -150]);
-  const rotation = useTransform(smoothScrollY, [0, 1000], [0, 10]);
 
   const [isLoaded, setIsLoaded] = useState(false);
 
@@ -159,310 +170,224 @@ export default function HomePage() {
   }, []);
 
   return (
-    <MainLayout>
+    <div className="min-h-screen flex flex-col">
+      {/* Enhanced NavBar */}
+      <EnhancedNavBar />
+
       {/* Hero Section */}
       <motion.section
         id="hero"
         ref={heroRef}
-        className="relative min-h-screen flex items-center justify-center overflow-hidden bg-background dark:bg-[#0F172A] text-foreground dark:text-white"
+        className="relative min-h-screen flex items-center justify-center overflow-hidden bg-background dark:bg-[#0F172A] text-foreground dark:text-white pt-16"
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={{ duration: 1 }}
       >
         {/* Enhanced Background */}
         <div className="absolute inset-0 z-0">
-          <div className="absolute inset-0 bg-gradient-radial from-blue-100/30 via-background/80 to-background dark:from-blue-900/30 dark:via-[#0F172A]/80 dark:to-[#0F172A] opacity-80"></div>
+          <div className="absolute inset-0 bg-gradient-radial from-blue-500/10 via-background/80 to-background dark:from-blue-900/20 dark:via-[#0F172A]/80 dark:to-[#0F172A]"></div>
 
-          <AnimatedParticles count={20} className="absolute inset-0 opacity-30" />
+          <AnimatedParticles count={30} className="absolute inset-0 opacity-30" />
 
-          <motion.div className="absolute inset-0 z-10 opacity-10" style={{ y, rotateZ: rotation }}>
-            <div className="absolute top-0 left-0 w-full h-full">
-              <svg
-                className="w-full h-full"
-                viewBox="0 0 1000 1000"
-                xmlns="http://www.w3.org/2000/svg"
-              >
-                <defs>
-                  <pattern id="grid" width="40" height="40" patternUnits="userSpaceOnUse">
-                    <path
-                      d="M 40 0 L 0 0 0 40"
-                      fill="none"
-                      stroke="currentColor"
-                      strokeWidth="0.5"
-                    />
-                  </pattern>
-                </defs>
-                <rect width="100%" height="100%" fill="url(#grid)" />
-              </svg>
-            </div>
+          {/* Grid pattern */}
+          <motion.div className="absolute inset-0 opacity-[0.02]" style={{ y }}>
+            <div
+              className="w-full h-full"
+              style={{
+                backgroundImage: `linear-gradient(rgba(59, 130, 246, 0.5) 1px, transparent 1px),
+                                 linear-gradient(90deg, rgba(59, 130, 246, 0.5) 1px, transparent 1px)`,
+                backgroundSize: '50px 50px',
+              }}
+            />
           </motion.div>
 
           {/* Animated colored orbs */}
           <motion.div
-            className="absolute top-1/4 left-1/4 w-64 h-64 rounded-full bg-blue-200/10 dark:bg-blue-500/10 blur-3xl"
+            className="absolute top-1/4 left-1/4 w-96 h-96 rounded-full bg-blue-500/10 blur-3xl"
             animate={{
               scale: [1, 1.2, 1],
-              x: [0, 20, 0],
-              y: [0, -20, 0],
-              opacity: [0.5, 0.7, 0.5],
+              x: [0, 50, 0],
+              y: [0, -30, 0],
             }}
-            transition={{ duration: 8, repeat: Infinity, ease: 'easeInOut' }}
+            transition={{ duration: 15, repeat: Infinity, ease: 'easeInOut' }}
             style={{ x: parallax1 }}
           />
           <motion.div
-            className="absolute bottom-1/4 right-1/4 w-96 h-96 rounded-full bg-purple-200/10 dark:bg-purple-500/10 blur-3xl"
+            className="absolute bottom-1/4 right-1/4 w-[500px] h-[500px] rounded-full bg-purple-500/10 blur-3xl"
             animate={{
               scale: [1, 1.3, 1],
-              x: [0, -30, 0],
-              y: [0, 20, 0],
-              opacity: [0.5, 0.8, 0.5],
+              x: [0, -40, 0],
+              y: [0, 40, 0],
             }}
-            transition={{ duration: 10, repeat: Infinity, ease: 'easeInOut', delay: 1 }}
+            transition={{ duration: 20, repeat: Infinity, ease: 'easeInOut', delay: 2 }}
             style={{ x: parallax2 }}
-          />
-          <motion.div
-            className="absolute top-1/2 right-1/3 w-72 h-72 rounded-full bg-cyan-200/10 dark:bg-cyan-500/10 blur-3xl"
-            animate={{
-              scale: [1, 1.2, 1],
-              x: [0, -20, 0],
-              y: [0, -30, 0],
-              opacity: [0.4, 0.6, 0.4],
-            }}
-            transition={{ duration: 9, repeat: Infinity, ease: 'easeInOut', delay: 2 }}
           />
         </div>
 
         {isLoaded && (
           <motion.div
-            style={{ opacity: heroOpacity, scale }}
-            className="container relative z-10 px-6 text-center"
+            style={{ opacity: heroOpacity }}
+            className="container relative z-10 px-6 text-center max-w-6xl"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
             transition={{ duration: 0.5 }}
           >
+            {/* Badge */}
             <motion.div
-              initial={{ opacity: 0, y: -20 }}
+              initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{
-                duration: 1,
-                delay: 0.2,
-                type: 'spring',
-                stiffness: 100,
-                damping: 20,
-              }}
+              transition={{ duration: 0.6, delay: 0.1 }}
+              className="mb-8"
             >
-              <motion.h1
-                className="text-5xl md:text-7xl font-bold mb-6 bg-clip-text text-transparent bg-gradient-to-r from-blue-400 via-purple-400 to-blue-500"
-                initial={{ opacity: 0, y: 30, scale: 0.9 }}
-                animate={{ opacity: 1, y: 0, scale: 1 }}
-                transition={{
-                  duration: 0.8,
-                  ease: [0.22, 1, 0.36, 1],
-                  type: 'spring',
-                  stiffness: 100,
-                  damping: 20,
-                }}
-              >
-                <span className="inline-block">WebSCADA</span>
-              </motion.h1>
+              <span className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-gradient-to-r from-blue-500/10 to-purple-500/10 border border-blue-500/20 text-sm">
+                <Sparkles className="h-4 w-4 text-blue-400" />
+                <span className="bg-gradient-to-r from-blue-400 to-purple-400 bg-clip-text text-transparent font-medium">
+                  Next-Gen Industrial IoT Platform
+                </span>
+              </span>
+            </motion.div>
+
+            {/* Main Heading with Typewriter */}
+            <motion.div
+              initial={{ opacity: 0, y: 30 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.8, delay: 0.2 }}
+              className="mb-6"
+            >
+              <h1 className="text-5xl md:text-7xl lg:text-8xl font-bold mb-4">
+                <span className="block mb-2 bg-clip-text text-transparent bg-gradient-to-r from-white via-blue-100 to-white dark:from-gray-200 dark:via-blue-200 dark:to-gray-200">
+                  WebSCADA
+                </span>
+                <span className="block text-3xl md:text-4xl lg:text-5xl">
+                  <TypewriterText
+                    words={rotatingWords}
+                    className="bg-clip-text text-transparent bg-gradient-to-r from-blue-400 via-purple-400 to-pink-400"
+                  />
+                </span>
+              </h1>
             </motion.div>
 
             <motion.p
-              className="text-xl md:text-2xl mb-10 max-w-3xl mx-auto text-foreground/80 dark:text-gray-300"
+              className="text-xl md:text-2xl mb-10 max-w-3xl mx-auto text-muted-foreground dark:text-gray-300"
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{
-                duration: 0.8,
-                delay: 0.5,
-                ease: [0.22, 1, 0.36, 1],
-              }}
+              transition={{ duration: 0.8, delay: 0.5 }}
             >
-              Next-generation industrial monitoring and control platform. Connect, visualize, and
-              optimize your operations in real-time.
+              Connect, visualize, and optimize your industrial operations in real-time with
+              enterprise-grade SCADA capabilities.
             </motion.p>
 
+            {/* CTA Buttons */}
             <motion.div
-              className="flex flex-col sm:flex-row gap-4 justify-center"
-              initial="hidden"
-              animate="visible"
-              variants={{
-                hidden: { opacity: 0 },
-                visible: {
-                  opacity: 1,
-                  transition: {
-                    staggerChildren: 0.1,
-                    when: 'beforeChildren',
-                    delayChildren: 0.1,
-                  },
-                },
-              }}
+              className="flex flex-col sm:flex-row gap-4 justify-center items-center"
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.8, delay: 0.7 }}
             >
-              <motion.div
-                variants={{
-                  hidden: { y: 20, opacity: 0 },
-                  visible: { y: 0, opacity: 1 },
-                }}
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.98 }}
-              >
+              <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
                 <Button
                   asChild
                   size="lg"
-                  className="relative overflow-hidden group transition-all shadow-lg bg-gradient-to-r from-blue-600 to-blue-500 hover:from-blue-500 hover:to-blue-600 border-0 h-14 px-8"
+                  className="relative overflow-hidden group h-14 px-8 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 border-0 shadow-lg shadow-blue-500/25"
                 >
-                  <Link href="/dashboard">
-                    <span className="relative z-10 flex items-center">
-                      Get Started
-                      <ArrowRight className="ml-2 h-5 w-5 transition-transform group-hover:translate-x-1" />
-                    </span>
-                    <span className="absolute inset-0 bg-white/10 dark:bg-white/10 translate-y-full group-hover:translate-y-0 transition-transform duration-300"></span>
+                  <Link href="/console/dashboard">
+                    <Rocket className="mr-2 h-5 w-5" />
+                    <span className="relative z-10">Get Started</span>
+                    <ArrowRight className="ml-2 h-5 w-5 transition-transform group-hover:translate-x-1" />
                   </Link>
                 </Button>
               </motion.div>
 
-              <motion.div
-                variants={{
-                  hidden: { y: 20, opacity: 0 },
-                  visible: { y: 0, opacity: 1 },
-                }}
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.98 }}
-              >
+              <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
                 <Button
                   variant="outline"
                   size="lg"
                   asChild
-                  className="transition-all border-border hover:bg-muted dark:border-white/20 dark:hover:bg-white/10 h-14 px-8"
+                  className="h-14 px-8 border-2 border-blue-500/30 hover:border-blue-500/50 hover:bg-blue-500/10"
                 >
-                  <Link href="/dashboard">View Live Demo</Link>
+                  <Link href="/console/dashboard">
+                    <Code2 className="mr-2 h-5 w-5" />
+                    View Live Demo
+                  </Link>
                 </Button>
               </motion.div>
+            </motion.div>
+
+            {/* Trust Indicators */}
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ duration: 0.8, delay: 0.9 }}
+              className="mt-16 flex flex-wrap justify-center items-center gap-8 text-sm text-muted-foreground"
+            >
+              <span className="flex items-center gap-2">
+                <Shield className="h-4 w-4 text-green-400" />
+                Enterprise Security
+              </span>
+              <span className="flex items-center gap-2">
+                <Target className="h-4 w-4 text-blue-400" />
+                99.9% Uptime SLA
+              </span>
+              <span className="flex items-center gap-2">
+                <Zap className="h-4 w-4 text-purple-400" />
+                50ms Latency
+              </span>
             </motion.div>
           </motion.div>
         )}
 
-        {/* Floating Device Mockups */}
-        <div className="absolute bottom-0 left-1/2 transform -translate-x-1/2 w-full max-w-6xl">
-          <motion.div
-            initial={{ y: 100, opacity: 0 }}
-            animate={{ y: 0, opacity: 1 }}
-            transition={{
-              duration: 1,
-              delay: 0.8,
-              type: 'spring',
-              stiffness: 50,
-              damping: 15,
-            }}
-            className="relative h-64 md:h-96"
-          >
-            {/* Dashboard Mockup */}
-            <motion.div
-              className="absolute bottom-0 left-1/2 transform -translate-x-1/2 w-full backdrop-blur-md bg-white/10 dark:bg-gray-900/50 rounded-t-xl overflow-hidden border border-border dark:border-gray-800 border-b-0 shadow-2xl"
-              initial={{ y: 100 }}
-              animate={{ y: 0 }}
-              transition={{
-                duration: 0.7,
-                delay: 0.8,
-                ease: [0.22, 1, 0.36, 1],
-                type: 'spring',
-                stiffness: 50,
-                damping: 15,
-              }}
-              whileHover={{
-                y: -10,
-                transition: {
-                  type: 'spring',
-                  stiffness: 500,
-                  damping: 30,
-                },
-              }}
-            >
-              <div className="w-full h-6 bg-muted/80 dark:bg-gray-800/80 flex items-center px-4">
-                <div className="flex space-x-2">
-                  <div className="w-2.5 h-2.5 rounded-full bg-red-500"></div>
-                  <div className="w-2.5 h-2.5 rounded-full bg-yellow-500"></div>
-                  <div className="w-2.5 h-2.5 rounded-full bg-green-500"></div>
-                </div>
-              </div>
-              <div className="w-full aspect-[16/9] relative bg-card/80 dark:bg-[#0F172A]/80 flex items-center justify-center p-4">
-                <div className="absolute inset-0 grid grid-cols-2 gap-2 p-4">
-                  <div className="bg-muted/50 dark:bg-gray-800/50 rounded-lg p-2 flex flex-col">
-                    <div className="h-2 w-16 bg-blue-300/40 dark:bg-blue-500/40 rounded mb-2"></div>
-                    <div className="h-20 bg-blue-200/20 dark:bg-blue-500/20 rounded flex items-center justify-center">
-                      <LineChart className="h-8 w-8 text-blue-400/40" />
-                    </div>
-                  </div>
-                  <div className="bg-muted/50 dark:bg-gray-800/50 rounded-lg p-2 flex flex-col">
-                    <div className="h-2 w-20 bg-purple-300/40 dark:bg-purple-500/40 rounded mb-2"></div>
-                    <div className="h-20 bg-purple-200/20 dark:bg-purple-500/20 rounded flex items-center justify-center">
-                      <BarChart className="h-8 w-8 text-purple-400/40" />
-                    </div>
-                  </div>
-                  <div className="bg-muted/50 dark:bg-gray-800/50 rounded-lg p-2 flex flex-col">
-                    <div className="h-2 w-14 bg-cyan-300/40 dark:bg-cyan-500/40 rounded mb-2"></div>
-                    <div className="h-20 bg-cyan-200/20 dark:bg-cyan-500/20 rounded flex items-center justify-center">
-                      <Cpu className="h-8 w-8 text-cyan-400/40" />
-                    </div>
-                  </div>
-                  <div className="bg-muted/50 dark:bg-gray-800/50 rounded-lg p-2 flex flex-col">
-                    <div className="h-2 w-16 bg-green-300/40 dark:bg-green-500/40 rounded mb-2"></div>
-                    <div className="h-20 bg-green-200/20 dark:bg-green-500/20 rounded flex items-center justify-center">
-                      <Activity className="h-8 w-8 text-green-400/40" />
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </motion.div>
-          </motion.div>
-        </div>
-
         {/* Scroll indicator */}
-        <div className="absolute bottom-8 left-1/2 -translate-x-1/2 z-10">
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ delay: 1.2 }}
+          className="absolute bottom-8 left-1/2 -translate-x-1/2 z-10"
+        >
           <motion.div
             animate={{ y: [0, 10, 0] }}
             transition={{ repeat: Infinity, duration: 1.5 }}
-            className="flex flex-col items-center"
+            className="flex flex-col items-center cursor-pointer"
           >
-            <span className="text-sm text-foreground/50 dark:text-gray-300 mb-2">
-              Scroll to explore
-            </span>
-            <ChevronDown className="h-6 w-6 text-foreground dark:text-white" />
+            <span className="text-sm text-muted-foreground mb-2">Scroll to explore</span>
+            <ChevronDown className="h-6 w-6 text-blue-400" />
           </motion.div>
-        </div>
+        </motion.div>
       </motion.section>
 
+      {/* Stats Section */}
+      <section className="py-20 bg-muted/30 dark:bg-[#1E293B]/50 relative overflow-hidden">
+        <div className="container mx-auto px-6">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-6 max-w-5xl mx-auto">
+            {stats.map((stat, index) => (
+              <AnimatedCounter
+                key={index}
+                value={stat.value}
+                label={stat.label}
+              />
+            ))}
+          </div>
+        </div>
+      </section>
+
       {/* Features Section */}
-      <section
-        id="features"
-        ref={featuresRef}
-        className="py-28 bg-muted/50 dark:bg-[#1E293B] relative overflow-hidden"
-      >
-        <div className="absolute inset-0 overflow-hidden">
-          <motion.div
-            className="absolute top-0 right-0 w-1/2 h-1/2 bg-blue-200/5 dark:bg-blue-500/5 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2"
-            animate={{
-              scale: [1, 1.2, 1],
-              opacity: [0.3, 0.5, 0.3],
-            }}
-            transition={{
-              duration: 8,
-              repeat: Infinity,
-              ease: 'easeInOut',
-            }}
-          />
+      <section className="py-28 bg-background dark:bg-[#0F172A] relative overflow-hidden">
+        <div className="absolute inset-0">
+          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] bg-blue-500/5 rounded-full blur-3xl" />
         </div>
 
         <div className="container mx-auto px-6 relative z-10">
           <AnimatedContainer className="text-center mb-20">
-            <AnimatedElement animation="slideUp" className="inline-block mb-4">
-              <span className="inline-block py-1 px-3 bg-blue-500/10 rounded-full text-blue-400 text-sm font-medium border border-blue-500/20 mb-2">
-                Powerful Features
-              </span>
-            </AnimatedElement>
+            <motion.span
+              initial={{ opacity: 0, scale: 0.8 }}
+              whileInView={{ opacity: 1, scale: 1 }}
+              viewport={{ once: true }}
+              className="inline-block py-1 px-3 bg-blue-500/10 rounded-full text-blue-400 text-sm font-medium border border-blue-500/20 mb-4"
+            >
+              Powerful Features
+            </motion.span>
 
             <AnimatedElement animation="slideUp" delay={0.1}>
-              <h2 className="text-3xl md:text-5xl font-bold mb-4 bg-clip-text text-transparent bg-gradient-to-r from-blue-400 via-purple-400 to-blue-500">
+              <h2 className="text-3xl md:text-5xl font-bold mb-4 bg-clip-text text-transparent bg-gradient-to-r from-blue-400 via-purple-400 to-pink-400">
                 Everything You Need for Industrial IoT
               </h2>
             </AnimatedElement>
@@ -475,89 +400,40 @@ export default function HomePage() {
             </AnimatedElement>
           </AnimatedContainer>
 
-          {/* Stats */}
-          <AnimatedContainer className="grid grid-cols-2 md:grid-cols-4 gap-6 max-w-4xl mx-auto mb-20">
-            {stats.map((stat, index) => (
-              <AnimatedElement
-                key={index}
-                animation="scale"
-                delay={index * 0.1}
-                className="text-center"
-              >
-                <motion.div
-                  className="relative"
-                  whileHover={{ scale: 1.05 }}
-                  transition={{ type: 'spring', stiffness: 300, damping: 10 }}
-                >
-                  <div className="bg-card dark:bg-[#0F172A]/80 backdrop-blur-sm rounded-xl p-6 border border-border dark:border-gray-800/50 relative z-10">
-                    <h3 className="text-3xl md:text-4xl font-bold mb-1 text-foreground dark:text-white">
-                      {stat.value}
-                    </h3>
-                    <p className="text-muted-foreground dark:text-gray-400">{stat.label}</p>
-                  </div>
-                </motion.div>
-              </AnimatedElement>
-            ))}
-          </AnimatedContainer>
-
-          {/* Feature Cards */}
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
             {features.map((feature, index) => (
-              <AnimatedElement key={index} animation="slideUp" delay={index * 0.1 + 0.2}>
-                <motion.div
-                  className="bg-card dark:bg-[#0F172A] rounded-xl overflow-hidden transition-all duration-300 hover:shadow-lg hover:shadow-blue-500/10 h-full border border-border dark:border-gray-800/50 relative z-10"
-                  whileHover={{
-                    y: -10,
-                    boxShadow: '0 20px 40px rgba(0, 0, 0, 0.3)',
-                    transition: { duration: 0.3 },
-                  }}
-                >
-                  <div className={`h-2 w-full bg-gradient-to-r ${feature.gradient}`}></div>
-                  <div className="p-6">
-                    <motion.div
-                      className="mb-6 flex justify-center items-center w-16 h-16 rounded-lg bg-muted dark:bg-gray-800/80"
-                      whileHover={{
-                        rotate: 5,
-                        scale: 1.1,
-                        transition: {
-                          type: 'spring',
-                          stiffness: 300,
-                          damping: 10,
-                        },
-                      }}
-                    >
-                      {feature.icon}
-                    </motion.div>
-                    <h3 className="text-xl font-bold mb-3 text-foreground dark:text-white">
-                      {feature.title}
-                    </h3>
-                    <p className="text-muted-foreground dark:text-gray-400">
-                      {feature.description}
-                    </p>
-                  </div>
-                </motion.div>
-              </AnimatedElement>
+              <EnhancedFeatureCard
+                key={index}
+                icon={feature.icon}
+                title={feature.title}
+                description={feature.description}
+                gradient={feature.gradient}
+                href={feature.href}
+                delay={index * 0.1}
+              />
             ))}
           </div>
         </div>
       </section>
 
+      {/* Showcase Section */}
+      <ShowcaseSection />
+
       {/* Solutions Section */}
-      <section
-        id="solutions"
-        ref={solutionsRef}
-        className="py-28 bg-background dark:bg-[#0F172A] relative overflow-hidden"
-      >
+      <section className="py-28 bg-background dark:bg-[#0F172A] relative overflow-hidden">
         <div className="container mx-auto px-6 relative z-10">
           <AnimatedContainer className="text-center mb-20">
-            <AnimatedElement animation="slideUp" className="inline-block mb-4">
-              <span className="inline-block py-1 px-3 bg-purple-500/10 rounded-full text-purple-400 text-sm font-medium border border-purple-500/20 mb-2">
-                Industry Solutions
-              </span>
-            </AnimatedElement>
+            <motion.span
+              initial={{ opacity: 0, scale: 0.8 }}
+              whileInView={{ opacity: 1, scale: 1 }}
+              viewport={{ once: true }}
+              className="inline-block py-1 px-3 bg-purple-500/10 rounded-full text-purple-400 text-sm font-medium border border-purple-500/20 mb-4"
+            >
+              Industry Solutions
+            </motion.span>
 
             <AnimatedElement animation="slideUp" delay={0.1}>
-              <h2 className="text-3xl md:text-5xl font-bold mb-4 bg-clip-text text-transparent bg-gradient-to-r from-blue-400 via-purple-400 to-blue-500">
+              <h2 className="text-3xl md:text-5xl font-bold mb-4 bg-clip-text text-transparent bg-gradient-to-r from-blue-400 via-purple-400 to-pink-400">
                 Solutions for Every Industry
               </h2>
             </AnimatedElement>
@@ -573,35 +449,22 @@ export default function HomePage() {
             {solutions.map((solution, index) => (
               <AnimatedElement key={index} animation="scale" delay={index * 0.1 + 0.3}>
                 <motion.div
-                  className="backdrop-blur-md bg-card/30 dark:bg-[#1E293B]/30 p-6 rounded-xl border border-border dark:border-gray-800/50 h-full"
-                  whileHover={{ scale: 1.03, transition: { duration: 0.3 } }}
+                  className="backdrop-blur-md bg-card/30 dark:bg-[#1E293B]/30 p-6 rounded-xl border border-border dark:border-gray-800/50 h-full group"
+                  whileHover={{ y: -5, transition: { duration: 0.3 } }}
                 >
                   <motion.div
-                    className={`flex items-center justify-center w-16 h-16 rounded-full ${solution.color} text-white mb-6`}
-                    whileHover={{ rotate: 5, scale: 1.05 }}
-                    whileTap={{ scale: 0.95 }}
-                    transition={{ type: 'spring', stiffness: 300, damping: 10 }}
+                    className={`flex items-center justify-center w-16 h-16 rounded-full ${solution.color} text-white mb-6 relative overflow-hidden`}
+                    whileHover={{ rotate: 360, scale: 1.1 }}
+                    transition={{ duration: 0.6 }}
                   >
                     {solution.icon}
                   </motion.div>
-                  <h3 className="text-xl font-bold mb-3 text-foreground dark:text-white">
+                  <h3 className="text-xl font-bold mb-3 text-foreground dark:text-white group-hover:text-transparent group-hover:bg-clip-text group-hover:bg-gradient-to-r group-hover:from-blue-400 group-hover:to-purple-400 transition-all">
                     {solution.title}
                   </h3>
                   <p className="text-muted-foreground dark:text-gray-400 mb-4">
                     {solution.description}
                   </p>
-                  <motion.div
-                    whileHover={{ x: 5 }}
-                    transition={{ type: 'spring', stiffness: 300, damping: 10 }}
-                  >
-                    <Link
-                      href={`/solutions/${solution.title.toLowerCase()}`}
-                      className="text-blue-400 hover:text-blue-300 flex items-center group"
-                    >
-                      Learn more
-                      <ArrowRight className="ml-1 h-5 w-5" />
-                    </Link>
-                  </motion.div>
                 </motion.div>
               </AnimatedElement>
             ))}
@@ -610,21 +473,20 @@ export default function HomePage() {
       </section>
 
       {/* Testimonials */}
-      <section
-        id="testimonials"
-        ref={testimonialsRef}
-        className="py-28 bg-muted/50 dark:bg-[#1E293B] relative overflow-hidden"
-      >
+      <section className="py-28 bg-muted/50 dark:bg-[#1E293B] relative overflow-hidden">
         <div className="container mx-auto px-6 relative z-10">
           <AnimatedContainer className="text-center mb-20">
-            <AnimatedElement animation="slideUp" className="inline-block mb-4">
-              <span className="inline-block py-1 px-3 bg-cyan-500/10 rounded-full text-cyan-400 text-sm font-medium border border-cyan-500/20 mb-2">
-                Success Stories
-              </span>
-            </AnimatedElement>
+            <motion.span
+              initial={{ opacity: 0, scale: 0.8 }}
+              whileInView={{ opacity: 1, scale: 1 }}
+              viewport={{ once: true }}
+              className="inline-block py-1 px-3 bg-cyan-500/10 rounded-full text-cyan-400 text-sm font-medium border border-cyan-500/20 mb-4"
+            >
+              Success Stories
+            </motion.span>
 
             <AnimatedElement animation="slideUp" delay={0.1}>
-              <h2 className="text-3xl md:text-5xl font-bold mb-4 bg-clip-text text-transparent bg-gradient-to-r from-blue-400 via-cyan-400 to-blue-500">
+              <h2 className="text-3xl md:text-5xl font-bold mb-4 bg-clip-text text-transparent bg-gradient-to-r from-blue-400 via-cyan-400 to-purple-400">
                 Trusted by Industry Leaders
               </h2>
             </AnimatedElement>
@@ -640,10 +502,10 @@ export default function HomePage() {
             {testimonials.map((testimonial, index) => (
               <AnimatedElement key={index} animation="scale" delay={index * 0.1 + 0.3}>
                 <motion.div
-                  className="bg-card dark:bg-[#0F172A] p-6 rounded-xl border border-border dark:border-gray-800 h-full"
+                  className="bg-card dark:bg-[#0F172A] p-6 rounded-xl border border-border dark:border-gray-800 h-full group"
                   whileHover={{
                     y: -5,
-                    boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.25)',
+                    boxShadow: '0 25px 50px -12px rgba(59, 130, 246, 0.25)',
                     transition: { duration: 0.3 },
                   }}
                 >
@@ -670,9 +532,6 @@ export default function HomePage() {
                     <p className="text-muted-foreground dark:text-gray-300 relative z-10">
                       {testimonial.quote}
                     </p>
-                    <div className="absolute -bottom-6 -right-2 text-5xl text-blue-500/20 font-serif rotate-180">
-                      "
-                    </div>
                   </div>
                 </motion.div>
               </AnimatedElement>
@@ -682,111 +541,157 @@ export default function HomePage() {
       </section>
 
       {/* CTA Section */}
-      <section id="cta" ref={ctaRef} className="py-28 relative overflow-hidden">
-        <div className="absolute inset-0 bg-gradient-to-r from-blue-900 via-indigo-900 to-purple-900">
+      <section className="py-28 relative overflow-hidden">
+        <div className="absolute inset-0 bg-gradient-to-br from-blue-900 via-indigo-900 to-purple-900">
           <AnimatedParticles count={40} className="absolute inset-0" color="bg-white" />
-
-          <motion.div
-            className="absolute right-1/4 bottom-1/3 w-64 h-64 rounded-full bg-blue-500/30 blur-3xl"
-            animate={{
-              scale: [1, 1.1, 1],
-              opacity: [0.3, 0.5, 0.3],
-            }}
-            transition={{
-              duration: 8,
-              repeat: Infinity,
-              ease: 'easeInOut',
-            }}
-          />
-          <motion.div
-            className="absolute left-1/4 top-1/3 w-64 h-64 rounded-full bg-purple-500/30 blur-3xl"
-            animate={{
-              scale: [1, 1.2, 1],
-              opacity: [0.3, 0.5, 0.3],
-            }}
-            transition={{
-              duration: 10,
-              repeat: Infinity,
-              ease: 'easeInOut',
-              delay: 2,
-            }}
-          />
         </div>
 
         <div className="container mx-auto px-6 relative z-10">
-          <div className="max-w-4xl mx-auto">
-            <AnimatedContainer className="bg-gradient-to-r from-blue-900/80 to-purple-900/80 backdrop-blur-md p-12 rounded-2xl border border-white/10 shadow-2xl">
-              <AnimatedElement animation="slideUp">
-                <h2 className="text-3xl md:text-5xl font-bold mb-6 text-white text-center">
-                  Start Monitoring Your Operations Today
-                </h2>
-              </AnimatedElement>
+          <div className="max-w-4xl mx-auto text-center">
+            <motion.div
+              initial={{ opacity: 0, y: 30 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.6 }}
+            >
+              <h2 className="text-4xl md:text-6xl font-bold mb-6 text-white">
+                Start Monitoring Your Operations Today
+              </h2>
+              <p className="text-xl mb-10 text-white/90">
+                Join industry leaders who trust WebSCADA for mission-critical industrial automation.
+              </p>
 
-              <AnimatedElement animation="slideUp" delay={0.1}>
-                <p className="text-xl mb-10 text-white/90 text-center">
-                  Join industry leaders who trust WebSCADA for mission-critical industrial
-                  automation.
-                </p>
-              </AnimatedElement>
-
-              <AnimatedElement animation="scale" delay={0.2}>
-                <div className="flex flex-col sm:flex-row justify-center gap-6">
-                  <motion.div
-                    whileHover={{ scale: 1.05 }}
-                    whileTap={{ scale: 0.98 }}
-                    className="relative"
+              <div className="flex flex-col sm:flex-row justify-center gap-6 mb-12">
+                <motion.div
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.98 }}
+                  className="relative"
+                >
+                  <div className="absolute -inset-1 bg-gradient-to-r from-blue-500 to-purple-600 rounded-lg blur-md opacity-75"></div>
+                  <Button
+                    asChild
+                    size="lg"
+                    className="relative bg-white text-blue-900 hover:bg-white/90 font-bold h-14 px-8 rounded-lg"
                   >
-                    <div className="absolute -inset-1 bg-gradient-to-r from-blue-500 to-purple-600 rounded-lg blur-md opacity-75"></div>
-                    <Button
-                      asChild
-                      size="lg"
-                      className="relative bg-gradient-to-r from-blue-600 to-purple-700 hover:from-blue-700 hover:to-purple-800 font-bold text-white h-14 px-8 rounded-lg border-0"
-                    >
-                      <Link href="/dashboard">
-                        <span className="flex items-center">
-                          View Dashboard
-                          <ArrowRight className="ml-2 h-5 w-5" />
-                        </span>
-                      </Link>
-                    </Button>
-                  </motion.div>
+                    <Link href="/console/dashboard">
+                      <span className="flex items-center">
+                        View Dashboard
+                        <ArrowRight className="ml-2 h-5 w-5" />
+                      </span>
+                    </Link>
+                  </Button>
+                </motion.div>
 
-                  <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.98 }}>
-                    <Button
-                      variant="outline"
-                      asChild
-                      size="lg"
-                      className="border-white/20 bg-white/5 text-white hover:bg-white/10 h-14 px-8 rounded-lg"
-                    >
-                      <Link href="/devices">Explore Devices</Link>
-                    </Button>
-                  </motion.div>
-                </div>
-              </AnimatedElement>
+                <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.98 }}>
+                  <Button
+                    variant="outline"
+                    asChild
+                    size="lg"
+                    className="border-2 border-white/30 bg-white/5 text-white hover:bg-white/10 h-14 px-8 rounded-lg"
+                  >
+                    <Link href="/devices">Explore Devices</Link>
+                  </Button>
+                </motion.div>
+              </div>
 
-              <AnimatedElement animation="fade" delay={0.3} className="mt-12">
-                <div className="flex flex-wrap justify-center items-center gap-6 text-white/60 text-sm">
-                  <span className="flex items-center gap-2">
-                    <Database className="h-4 w-4" /> Real-time Data
-                  </span>
-                  <span className="hidden md:inline">•</span>
-                  <span className="flex items-center gap-2">
-                    <Lock className="h-4 w-4" /> Secure
-                  </span>
-                  <span className="hidden md:inline">•</span>
-                  <span className="flex items-center gap-2">
-                    <Wifi className="h-4 w-4" /> Always Connected
-                  </span>
-                  <span className="hidden md:inline">•</span>
-                  <span className="flex items-center gap-2">
-                    <Bell className="h-4 w-4" /> Instant Alerts
-                  </span>
-                </div>
-              </AnimatedElement>
-            </AnimatedContainer>
+              <div className="flex flex-wrap justify-center items-center gap-6 text-white/60 text-sm">
+                <span className="flex items-center gap-2">
+                  <Database className="h-4 w-4" /> Real-time Data
+                </span>
+                <span className="hidden md:inline">•</span>
+                <span className="flex items-center gap-2">
+                  <Lock className="h-4 w-4" /> Secure
+                </span>
+                <span className="hidden md:inline">•</span>
+                <span className="flex items-center gap-2">
+                  <Wifi className="h-4 w-4" /> Always Connected
+                </span>
+                <span className="hidden md:inline">•</span>
+                <span className="flex items-center gap-2">
+                  <Bell className="h-4 w-4" /> Instant Alerts
+                </span>
+              </div>
+            </motion.div>
           </div>
         </div>
       </section>
-    </MainLayout>
+
+      {/* Footer */}
+      <footer className="border-t border-border bg-muted/50 dark:bg-[#1E293B]">
+        <div className="container mx-auto px-6 py-12">
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
+            <div>
+              <h3 className="font-semibold mb-4 text-lg">WebSCADA</h3>
+              <p className="text-sm text-muted-foreground dark:text-gray-400">
+                Modern industrial monitoring and control system for the future of automation.
+              </p>
+            </div>
+            <div>
+              <h3 className="font-semibold mb-4">Product</h3>
+              <ul className="space-y-2 text-sm text-muted-foreground dark:text-gray-400">
+                <li>
+                  <Link href="/features" className="hover:text-blue-400 transition-colors">
+                    Features
+                  </Link>
+                </li>
+                <li>
+                  <Link href="/pricing" className="hover:text-blue-400 transition-colors">
+                    Pricing
+                  </Link>
+                </li>
+                <li>
+                  <Link href="/docs" className="hover:text-blue-400 transition-colors">
+                    Documentation
+                  </Link>
+                </li>
+              </ul>
+            </div>
+            <div>
+              <h3 className="font-semibold mb-4">Support</h3>
+              <ul className="space-y-2 text-sm text-muted-foreground dark:text-gray-400">
+                <li>
+                  <Link href="/help" className="hover:text-blue-400 transition-colors">
+                    Help Center
+                  </Link>
+                </li>
+                <li>
+                  <Link href="/contact" className="hover:text-blue-400 transition-colors">
+                    Contact
+                  </Link>
+                </li>
+                <li>
+                  <Link href="/status" className="hover:text-blue-400 transition-colors">
+                    System Status
+                  </Link>
+                </li>
+              </ul>
+            </div>
+            <div>
+              <h3 className="font-semibold mb-4">Company</h3>
+              <ul className="space-y-2 text-sm text-muted-foreground dark:text-gray-400">
+                <li>
+                  <Link href="/about" className="hover:text-blue-400 transition-colors">
+                    About
+                  </Link>
+                </li>
+                <li>
+                  <Link href="/blog" className="hover:text-blue-400 transition-colors">
+                    Blog
+                  </Link>
+                </li>
+                <li>
+                  <Link href="/careers" className="hover:text-blue-400 transition-colors">
+                    Careers
+                  </Link>
+                </li>
+              </ul>
+            </div>
+          </div>
+          <div className="mt-8 pt-8 border-t border-border text-center text-sm text-muted-foreground dark:text-gray-400">
+            <p>&copy; {new Date().getFullYear()} WebSCADA. All rights reserved.</p>
+          </div>
+        </div>
+      </footer>
+    </div>
   );
 }

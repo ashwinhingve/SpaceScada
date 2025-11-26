@@ -45,12 +45,13 @@ export class GSMService {
       const adapter = new GSMAdapter();
 
       try {
+        const connectionConfig: any = device.connectionConfig || { host: 'localhost', port: 8080 };
         await adapter.connect({
-          host: device.connectionConfig.host,
-          port: device.connectionConfig.port,
-          timeout: device.connectionConfig.timeout || 30000,
-          retryAttempts: device.connectionConfig.retryAttempts || 3,
-          retryDelay: device.connectionConfig.retryDelay || 5000,
+          host: connectionConfig.host,
+          port: connectionConfig.port,
+          timeout: connectionConfig.timeout || 30000,
+          retryAttempts: connectionConfig.retryAttempts || 3,
+          retryDelay: connectionConfig.retryDelay || 5000,
           options: (device.gsmConfig || {}) as unknown as Record<string, unknown>,
         });
 
@@ -464,8 +465,8 @@ export class GSMService {
       status.imei,
       status.iccid,
       status.simStatus,
-      status.dataUsage?.sentBytes || 0,
-      status.dataUsage?.receivedBytes || 0,
+      status.dataUsage?.sent || 0,
+      status.dataUsage?.received || 0,
       status.timestamp,
     ]);
   }
@@ -494,10 +495,8 @@ export class GSMService {
       iccid: row.iccid,
       simStatus: row.sim_status,
       dataUsage: {
-        sentBytes: row.data_sent_bytes,
-        receivedBytes: row.data_received_bytes,
-        totalBytes: row.data_sent_bytes + row.data_received_bytes,
-        resetDate: new Date(),
+        sent: row.data_sent_bytes || 0,
+        received: row.data_received_bytes || 0,
       },
       timestamp: row.timestamp,
     }));
@@ -548,10 +547,13 @@ export class GSMService {
 
     return {
       id: row.id,
+      device_id: row.device_id || row.id,
       name: row.name,
+      device_type: row.device_type || row.type,
       type: row.type,
       status: row.status,
       protocol: row.protocol,
+      config: config,
       connectionConfig: {
         host: config.host,
         port: config.port,
@@ -559,11 +561,11 @@ export class GSMService {
         retryAttempts: config.retryAttempts,
         retryDelay: config.retryDelay,
         options: config.gsmConfig,
-      },
+      } as any,
       gsmConfig: config.gsmConfig || {},
       tags: [],
-      createdAt: row.created_at,
-      updatedAt: row.updated_at,
+      created_at: row.created_at,
+      updated_at: row.updated_at,
     };
   }
 }

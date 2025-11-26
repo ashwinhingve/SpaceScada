@@ -24,38 +24,38 @@ build:
 deploy:
   kubectl:
     manifests:
-      - infrastructure/k8s/namespace.yaml
-      - infrastructure/k8s/base/postgres-config.yaml
-      - infrastructure/k8s/postgres-deployment.yaml
-      - infrastructure/k8s/redis-deployment.yaml
-      - infrastructure/k8s/base/backend-config.yaml
-      - infrastructure/k8s/base/backend-secrets.yaml
-      - infrastructure/k8s/backend-deployment.yaml
-      - infrastructure/k8s/base/frontend-config.yaml
-      - infrastructure/k8s/frontend-deployment.yaml
-      - infrastructure/k8s/simulator-deployment.yaml
-      - infrastructure/k8s/ingress.yaml
-      - infrastructure/k8s/monitoring/servicemonitor.yaml
+      - infrastructure/k3s/namespaces/webscada-dev.yaml
+      - infrastructure/k3s/manifests/base/postgres-config.yaml
+      - infrastructure/k3s/manifests/postgres-deployment.yaml
+      - infrastructure/k3s/manifests/redis-deployment.yaml
+      - infrastructure/k3s/manifests/base/backend-config.yaml
+      - infrastructure/k3s/manifests/base/backend-secrets.yaml
+      - infrastructure/k3s/manifests/backend-deployment.yaml
+      - infrastructure/k3s/manifests/base/frontend-config.yaml
+      - infrastructure/k3s/manifests/frontend-deployment.yaml
+      - infrastructure/k3s/manifests/simulator-deployment.yaml
+      - infrastructure/k3s/manifests/ingress.yaml
+      - infrastructure/k3s/manifests/monitoring/servicemonitor.yaml
 
 portForward:
   - resourceType: service
     resourceName: frontend
-    namespace: webscada
+    namespace: webscada-dev
     port: 3000
     localPort: 3000
   - resourceType: service
     resourceName: backend
-    namespace: webscada
+    namespace: webscada-dev
     port: 3001
     localPort: 3001
   - resourceType: service
     resourceName: postgres
-    namespace: webscada
+    namespace: webscada-dev
     port: 5432
     localPort: 5432
   - resourceType: service
     resourceName: redis
-    namespace: webscada
+    namespace: webscada-dev
     port: 6379
     localPort: 6379
 
@@ -81,17 +81,17 @@ profiles:
     deploy:
       kubectl:
         manifests:
-          - infrastructure/k8s/namespace.yaml
-          - infrastructure/k8s/base/postgres-config.yaml
-          - infrastructure/k8s/postgres-deployment.yaml
-          - infrastructure/k8s/redis-deployment.yaml
-          - infrastructure/k8s/base/backend-config.yaml
-          - infrastructure/k8s/base/backend-secrets.yaml
-          - infrastructure/k8s/backend-deployment.yaml
-          - infrastructure/k8s/base/frontend-config.yaml
-          - infrastructure/k8s/frontend-deployment.yaml
-          - infrastructure/k8s/simulator-deployment.yaml
-          - infrastructure/k8s/ingress.yaml
+          - infrastructure/k3s/namespaces/webscada-dev.yaml
+          - infrastructure/k3s/manifests/base/postgres-config.yaml
+          - infrastructure/k3s/manifests/postgres-deployment.yaml
+          - infrastructure/k3s/manifests/redis-deployment.yaml
+          - infrastructure/k3s/manifests/base/backend-config.yaml
+          - infrastructure/k3s/manifests/base/backend-secrets.yaml
+          - infrastructure/k3s/manifests/backend-deployment.yaml
+          - infrastructure/k3s/manifests/base/frontend-config.yaml
+          - infrastructure/k3s/manifests/frontend-deployment.yaml
+          - infrastructure/k3s/manifests/simulator-deployment.yaml
+          - infrastructure/k3s/manifests/ingress.yaml
 
   # Production profile with Helm
   - name: prod
@@ -105,7 +105,7 @@ profiles:
         releases:
           - name: webscada
             chartPath: infrastructure/helm/webscada
-            namespace: webscada
+            namespace: webscada-dev
             createNamespace: true
             valuesFiles:
               - infrastructure/helm/webscada/values.yaml

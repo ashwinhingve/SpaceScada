@@ -104,7 +104,7 @@ export const DeviceStatus = ({ device, className, variant = 'compact' }: DeviceS
             )}
             <p>
               <span className="font-medium">Last Update:</span>{' '}
-              {formatLastUpdate(device.lastUpdate)}
+              {device.lastUpdate ? formatLastUpdate(device.lastUpdate) : 'Never'}
             </p>
           </div>
         </div>

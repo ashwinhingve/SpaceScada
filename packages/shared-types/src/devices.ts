@@ -14,6 +14,8 @@ export enum DeviceType {
   STANDARD_MQTT = 'STANDARD_MQTT',
   ESP32 = 'ESP32',
   SENSOR = 'SENSOR',
+  WIFI = 'WIFI',
+  BLUETOOTH = 'BLUETOOTH',
 }
 
 export enum DeviceStatus {
@@ -64,6 +66,20 @@ export enum DataType {
   JSON = 'JSON',
 }
 
+export enum WiFiChipset {
+  ESP32 = 'ESP32',
+  ESP8266 = 'ESP8266',
+  ESP32_C3 = 'ESP32-C3',
+  ESP32_S2 = 'ESP32-S2',
+  ESP32_S3 = 'ESP32-S3',
+  OTHER = 'OTHER',
+}
+
+export enum BluetoothProtocol {
+  BLE = 'BLE',
+  CLASSIC = 'Classic',
+}
+
 // ============================================
 // BASE INTERFACES
 // ============================================
@@ -108,7 +124,10 @@ export interface ConnectionConfig {
   host: string;
   port: number;
   timeout?: number;
+  retryAttempts?: number;
+  retryDelay?: number;
   use_tls?: boolean;
+  options?: Record<string, unknown>;
 }
 
 // ============================================
@@ -422,14 +441,150 @@ export interface StandardMQTTDevice extends BaseDevice {
 }
 
 // ============================================
+// WI-FI DEVICE
+// ============================================
+
+export interface WiFiDeviceConfig {
+  // Wi-Fi hardware identifiers
+  mac_address: string; // MAC address (AA:BB:CC:DD:EE:FF)
+
+  // Network configuration
+  ssid: string; // Wi-Fi network SSID
+  password?: string; // Wi-Fi password (encrypted in storage)
+
+  // Device configuration
+  chipset: WiFiChipset;
+  firmware_version?: string;
+  hardware_version?: string;
+
+  // IP configuration
+  use_dhcp: boolean;
+  static_ip?: string;
+  gateway?: string;
+  subnet_mask?: string;
+  dns_primary?: string;
+  dns_secondary?: string;
+
+  // MQTT configuration (if device uses MQTT)
+  mqtt_enabled?: boolean;
+  mqtt_broker_host?: string;
+  mqtt_broker_port?: number;
+  mqtt_client_id?: string;
+  mqtt_username?: string;
+  mqtt_password?: string; // Encrypted
+  mqtt_use_tls?: boolean;
+
+  // Configuration
+  publish_interval?: number; // milliseconds
+  heartbeat_interval?: number; // milliseconds
+  enable_ota?: boolean;
+}
+
+export interface WiFiDeviceStatus {
+  // Connection status
+  connection_status: ConnectionStatus;
+  connected_at?: Date;
+
+  // Network info
+  ssid?: string;
+  ip_address?: string;
+  signal_strength?: number; // 0-100 (RSSI mapped to percentage)
+  channel?: number;
+
+  // Performance
+  bandwidth_usage?: number; // bytes/sec
+  packet_loss?: number; // percentage
+  latency?: number; // milliseconds
+
+  // Data transfer
+  bytes_sent?: number;
+  bytes_received?: number;
+  messages_sent?: number;
+  messages_received?: number;
+}
+
+export interface WiFiDevice extends BaseDevice {
+  device_type: DeviceType.WIFI;
+  config: WiFiDeviceConfig;
+  status_info?: WiFiDeviceStatus;
+}
+
+// ============================================
+// BLUETOOTH DEVICE
+// ============================================
+
+export interface BluetoothDeviceConfig {
+  // Bluetooth hardware identifiers
+  mac_address: string; // MAC address (AA:BB:CC:DD:EE:FF)
+
+  // Bluetooth configuration
+  protocol: BluetoothProtocol;
+  device_name?: string;
+
+  // BLE specific configuration
+  service_uuids?: string[]; // GATT service UUIDs
+  characteristic_uuids?: string[]; // GATT characteristic UUIDs
+
+  // Device info
+  firmware_version?: string;
+  hardware_version?: string;
+  manufacturer?: string;
+  model_number?: string;
+
+  // Power configuration
+  advertising_interval?: number; // milliseconds (BLE)
+  connection_interval?: number; // milliseconds
+  tx_power?: number; // dBm
+
+  // Configuration
+  enable_notifications?: boolean;
+  enable_indications?: boolean;
+  enable_ota?: boolean;
+}
+
+export interface BluetoothDeviceStatus {
+  // Connection status
+  connection_status: ConnectionStatus;
+  connected_at?: Date;
+
+  // Signal info
+  signal_strength?: number; // 0-100 (RSSI mapped to percentage)
+  rssi?: number; // Raw RSSI in dBm
+
+  // Power
+  battery_level?: number; // 0-100 percentage
+  battery_voltage?: number; // Volts
+
+  // BLE specific
+  advertising?: boolean;
+  bonded?: boolean;
+  encrypted?: boolean;
+
+  // Proximity
+  distance_estimate?: number; // meters (calculated from RSSI)
+  proximity_zone?: 'immediate' | 'near' | 'far' | 'unknown';
+
+  // Data transfer
+  notifications_received?: number;
+  indications_received?: number;
+  writes_sent?: number;
+}
+
+export interface BluetoothDevice extends BaseDevice {
+  device_type: DeviceType.BLUETOOTH;
+  config: BluetoothDeviceConfig;
+  status_info?: BluetoothDeviceStatus;
+}
+
+// ============================================
 // UNION TYPES
 // ============================================
 
-export type Device = GSMDevice | LoRaWANDevice | StandardMQTTDevice;
+export type Device = GSMDevice | LoRaWANDevice | StandardMQTTDevice | WiFiDevice | BluetoothDevice;
 
-export type DeviceConfig = GSMDeviceConfig | LoRaWANDeviceConfig | StandardMQTTDeviceConfig;
+export type DeviceConfig = GSMDeviceConfig | LoRaWANDeviceConfig | StandardMQTTDeviceConfig | WiFiDeviceConfig | BluetoothDeviceConfig;
 
-export type DeviceStatusInfo = GSMDeviceStatus | LoRaWANDeviceStatus | StandardMQTTDeviceStatus;
+export type DeviceStatusInfo = GSMDeviceStatus | LoRaWANDeviceStatus | StandardMQTTDeviceStatus | WiFiDeviceStatus | BluetoothDeviceStatus;
 
 // ============================================
 // TELEMETRY
@@ -679,6 +834,14 @@ export function isLoRaWANDevice(device: Device): device is LoRaWANDevice {
 
 export function isStandardMQTTDevice(device: Device): device is StandardMQTTDevice {
   return device.device_type === DeviceType.STANDARD_MQTT;
+}
+
+export function isWiFiDevice(device: Device): device is WiFiDevice {
+  return device.device_type === DeviceType.WIFI;
+}
+
+export function isBluetoothDevice(device: Device): device is BluetoothDevice {
+  return device.device_type === DeviceType.BLUETOOTH;
 }
 
 // ============================================

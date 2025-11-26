@@ -1,0 +1,622 @@
+'use client';
+
+import React, { useState, useEffect } from 'react';
+import Link from 'next/link';
+import {
+  Layers,
+  Database,
+  Users,
+  Key,
+  Radio,
+  Bell,
+  ArrowRight,
+  Star,
+  Smartphone,
+  Wifi,
+  Bluetooth,
+  Activity,
+  TrendingUp,
+  MapPin,
+} from 'lucide-react';
+import { Card } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
+import { GISDashboard } from '@/components/gis/GISDashboard';
+import { SCADADeviceCard } from '@/components/console/SCADADeviceCard';
+import { SCADAProcessView } from '@/components/console/SCADAProcessView';
+import { DeviceStatusPanel } from '@/components/console/DeviceStatusPanel';
+import { RealTimeDataWidget } from '@/components/console/RealTimeDataWidget';
+
+interface QuickActionCardProps {
+  icon: React.ReactNode;
+  title: string;
+  href: string;
+}
+
+function QuickActionCard({ icon, title, href }: QuickActionCardProps) {
+  return (
+    <Link href={href}>
+      <div className="bg-blue-500/10 hover:bg-blue-500/20 border border-blue-500/20 rounded-lg p-6 transition-all hover:scale-105 cursor-pointer group">
+        <div className="flex items-center gap-3">
+          <div className="text-blue-400 group-hover:text-blue-300">{icon}</div>
+          <span className="text-blue-300 font-medium">{title}</span>
+        </div>
+      </div>
+    </Link>
+  );
+}
+
+interface EntityRowProps {
+  type: 'application' | 'gateway' | 'device' | 'gsm-device' | 'wifi-device' | 'bluetooth-device';
+  name: string;
+  subtitle: string;
+  status: string;
+  icon: React.ReactNode;
+}
+
+function EntityRow({ type: _type, name, subtitle, status, icon }: EntityRowProps) {
+  return (
+    <div className="flex items-center justify-between py-3 px-4 hover:bg-gray-800/50 rounded transition-colors">
+      <div className="flex items-center gap-3">
+        <div className="text-gray-400">{icon}</div>
+        <div>
+          <div className="text-white font-medium">{name}</div>
+          <div className="text-gray-400 text-sm">{subtitle}</div>
+        </div>
+      </div>
+      <div className="flex items-center gap-2">
+        <span className="text-gray-400 text-sm">{status}</span>
+        <div className="w-2 h-2 rounded-full bg-orange-500" />
+      </div>
+    </div>
+  );
+}
+
+export default function ConsoleDashboard() {
+  const [activeTab, setActiveTab] = useState('all');
+  const [temperatureData, setTemperatureData] = useState<Array<{ timestamp: string; value: number }>>([]);
+  const [pressureData, setPressureData] = useState<Array<{ timestamp: string; value: number }>>([]);
+
+   
+  // Real-time Data for Charts
+  const generateRealtimeData = () => {
+    const now = new Date();
+    return Array.from({ length: 20 }, (_, i) => {
+      const time = new Date(now.getTime() - (19 - i) * 5000);
+      return {
+        timestamp: time.toLocaleTimeString('en-US', {
+          hour: '2-digit',
+          minute: '2-digit',
+          second: '2-digit'
+        }),
+        value: 20 + Math.random() * 10 + Math.sin(i / 3) * 5,
+      };
+    });
+  };
+
+  // Initialize real-time data on client side only to avoid hydration errors
+  useEffect(() => {
+    setTemperatureData(generateRealtimeData());
+    setPressureData(generateRealtimeData());
+  }, []);
+
+  // Process View Data
+  const processNodes = [
+    { id: 'node-1', name: 'Inlet Valve', x: 20, y: 30, status: 'active' as const, value: 'Open 100%' },
+    { id: 'node-2', name: 'Pump #1', x: 40, y: 30, status: 'active' as const, value: '1200 RPM' },
+    { id: 'node-3', name: 'Heat Exchanger', x: 60, y: 30, status: 'active' as const, value: '85°C' },
+    { id: 'node-4', name: 'Outlet Valve', x: 80, y: 30, status: 'active' as const, value: 'Open 75%' },
+    { id: 'node-5', name: 'Pressure Sensor', x: 50, y: 50, status: 'warning' as const, value: '3.2 bar' },
+    { id: 'node-6', name: 'Flow Meter', x: 70, y: 50, status: 'active' as const, value: '250 L/min' },
+  ];
+
+  const notifications = [
+    {
+      id: 1,
+      title: 'New API key created for application',
+      message: 'A new API key has just been created for your applicati...',
+      time: 'Sep 19, 2025',
+    },
+  ];
+
+  const entities = [
+    {
+      type: 'application' as const,
+      name: 'Dahi_project',
+      subtitle: 'dahi1',
+      status: 'No recent activity',
+      icon: <Layers className="h-5 w-5" />,
+    },
+    {
+      type: 'application' as const,
+      name: 'RM1',
+      subtitle: 'rammandir',
+      status: 'No recent activity',
+      icon: <Layers className="h-5 w-5" />,
+    },
+    {
+      type: 'gateway' as const,
+      name: 'WGW23',
+      subtitle: 'a84041fff29dbe6',
+      status: 'Other cluster',
+      icon: <Radio className="h-5 w-5" />,
+    },
+    {
+      type: 'gateway' as const,
+      name: 'Waarta14',
+      subtitle: 'waarta14',
+      status: 'Other cluster',
+      icon: <Radio className="h-5 w-5" />,
+    },
+    {
+      type: 'gsm-device' as const,
+      name: 'Field Sensor 1',
+      subtitle: '867545032123456',
+      status: 'Online - 2 min ago',
+      icon: <Smartphone className="h-5 w-5" />,
+    },
+    {
+      type: 'wifi-device' as const,
+      name: 'Temperature Sensor 1',
+      subtitle: 'A4:CF:12:34:56:78',
+      status: 'Online - 1 min ago',
+      icon: <Wifi className="h-5 w-5" />,
+    },
+    {
+      type: 'bluetooth-device' as const,
+      name: 'BLE Beacon 1',
+      subtitle: 'B8:27:EB:12:34:56',
+      status: 'Online - 2 min ago',
+      icon: <Bluetooth className="h-5 w-5" />,
+    },
+  ];
+
+  const filteredEntities =
+    activeTab === 'all'
+      ? entities
+      : entities.filter((e) => {
+          if (activeTab === 'applications') return e.type === 'application';
+          if (activeTab === 'gateways') return e.type === 'gateway';
+          if (activeTab === 'end-devices') return ['device'].includes(e.type);
+          if (activeTab === 'gsm-devices') return e.type === 'gsm-device';
+          if (activeTab === 'wifi-devices') return e.type === 'wifi-device';
+          if (activeTab === 'bluetooth-devices') return e.type === 'bluetooth-device';
+          return true;
+        });
+
+  return (
+    <div className="max-w-7xl">
+      {/* Breadcrumb */}
+      <div className="mb-6">
+        <div className="flex items-center gap-2 text-sm">
+          <Link href="/console" className="text-gray-400 hover:text-white">
+            Home
+          </Link>
+          <span className="text-gray-600">&gt;</span>
+          <span className="text-white">Dashboard</span>
+        </div>
+      </div>
+
+      {/* Quick Actions */}
+      <div className="mb-8">
+        <h2 className="text-xl font-bold text-white mb-4 flex items-center gap-2">
+          <Activity className="h-5 w-5 text-blue-400" />
+          Quick Actions
+        </h2>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+          <QuickActionCard
+            icon={<Layers className="h-6 w-6" />}
+            title="Create application"
+            href="/console/applications/new"
+          />
+          <QuickActionCard
+            icon={<Database className="h-6 w-6" />}
+            title="Add end device"
+            href="/console/end-devices/new"
+          />
+          <QuickActionCard
+            icon={<Radio className="h-6 w-6" />}
+            title="Register gateway"
+            href="/console/gateways/new"
+          />
+          <QuickActionCard
+            icon={<Smartphone className="h-6 w-6" />}
+            title="Add GSM device"
+            href="/console/gsm-devices/new"
+          />
+          <QuickActionCard
+            icon={<Wifi className="h-6 w-6" />}
+            title="Add Wi-Fi device"
+            href="/console/wifi-devices/new"
+          />
+          <QuickActionCard
+            icon={<Bluetooth className="h-6 w-6" />}
+            title="Add Bluetooth device"
+            href="/console/bluetooth-devices/new"
+          />
+          <QuickActionCard
+            icon={<Users className="h-6 w-6" />}
+            title="Create organization"
+            href="/console/organizations/new"
+          />
+          <QuickActionCard
+            icon={<Key className="h-6 w-6" />}
+            title="Add API key"
+            href="/console/settings/api-keys/new"
+          />
+        </div>
+      </div>
+
+      {/* Devices Overview */}
+      <div className="mb-8">
+        <h2 className="text-xl font-bold text-white mb-4 flex items-center gap-2">
+          <TrendingUp className="h-5 w-5 text-blue-400" />
+          Devices Overview
+        </h2>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+          {/* GSM Devices Card */}
+          <Link href="/console/gsm-devices">
+            <Card className="bg-[#1E293B] border-gray-800 hover:border-green-500/50 transition-all cursor-pointer group">
+              <div className="p-6">
+                <div className="flex items-center justify-between mb-4">
+                  <div className="p-3 bg-green-500/10 rounded-lg">
+                    <Smartphone className="h-8 w-8 text-green-400" />
+                  </div>
+                  <div className="text-right">
+                    <div className="text-3xl font-bold text-white group-hover:text-green-400 transition-colors">
+                      3
+                    </div>
+                    <div className="text-xs text-gray-400">Total</div>
+                  </div>
+                </div>
+                <h3 className="text-lg font-semibold text-white mb-2">GSM Devices</h3>
+                <div className="flex items-center justify-between text-sm">
+                  <span className="text-green-400 flex items-center gap-1">
+                    <span className="w-2 h-2 rounded-full bg-green-500" />
+                    2 Online
+                  </span>
+                  <span className="text-gray-400 flex items-center gap-1">
+                    <span className="w-2 h-2 rounded-full bg-gray-500" />
+                    1 Offline
+                  </span>
+                </div>
+              </div>
+            </Card>
+          </Link>
+
+          {/* Wi-Fi Devices Card */}
+          <Link href="/console/wifi-devices">
+            <Card className="bg-[#1E293B] border-gray-800 hover:border-blue-500/50 transition-all cursor-pointer group">
+              <div className="p-6">
+                <div className="flex items-center justify-between mb-4">
+                  <div className="p-3 bg-blue-500/10 rounded-lg">
+                    <Wifi className="h-8 w-8 text-blue-400" />
+                  </div>
+                  <div className="text-right">
+                    <div className="text-3xl font-bold text-white group-hover:text-blue-400 transition-colors">
+                      3
+                    </div>
+                    <div className="text-xs text-gray-400">Total</div>
+                  </div>
+                </div>
+                <h3 className="text-lg font-semibold text-white mb-2">Wi-Fi Devices</h3>
+                <div className="flex items-center justify-between text-sm">
+                  <span className="text-green-400 flex items-center gap-1">
+                    <span className="w-2 h-2 rounded-full bg-green-500" />
+                    2 Online
+                  </span>
+                  <span className="text-gray-400 flex items-center gap-1">
+                    <span className="w-2 h-2 rounded-full bg-gray-500" />
+                    1 Offline
+                  </span>
+                </div>
+              </div>
+            </Card>
+          </Link>
+
+          {/* Bluetooth Devices Card */}
+          <Link href="/console/bluetooth-devices">
+            <Card className="bg-[#1E293B] border-gray-800 hover:border-purple-500/50 transition-all cursor-pointer group">
+              <div className="p-6">
+                <div className="flex items-center justify-between mb-4">
+                  <div className="p-3 bg-purple-500/10 rounded-lg">
+                    <Bluetooth className="h-8 w-8 text-purple-400" />
+                  </div>
+                  <div className="text-right">
+                    <div className="text-3xl font-bold text-white group-hover:text-purple-400 transition-colors">
+                      3
+                    </div>
+                    <div className="text-xs text-gray-400">Total</div>
+                  </div>
+                </div>
+                <h3 className="text-lg font-semibold text-white mb-2">Bluetooth Devices</h3>
+                <div className="flex items-center justify-between text-sm">
+                  <span className="text-green-400 flex items-center gap-1">
+                    <span className="w-2 h-2 rounded-full bg-green-500" />
+                    2 Online
+                  </span>
+                  <span className="text-gray-400 flex items-center gap-1">
+                    <span className="w-2 h-2 rounded-full bg-gray-500" />
+                    1 Offline
+                  </span>
+                </div>
+              </div>
+            </Card>
+          </Link>
+
+          {/* End Devices Card */}
+          <Link href="/console/end-devices">
+            <Card className="bg-[#1E293B] border-gray-800 hover:border-orange-500/50 transition-all cursor-pointer group">
+              <div className="p-6">
+                <div className="flex items-center justify-between mb-4">
+                  <div className="p-3 bg-orange-500/10 rounded-lg">
+                    <Database className="h-8 w-8 text-orange-400" />
+                  </div>
+                  <div className="text-right">
+                    <div className="text-3xl font-bold text-white group-hover:text-orange-400 transition-colors">
+                      0
+                    </div>
+                    <div className="text-xs text-gray-400">Total</div>
+                  </div>
+                </div>
+                <h3 className="text-lg font-semibold text-white mb-2">End Devices</h3>
+                <div className="flex items-center justify-between text-sm">
+                  <span className="text-green-400 flex items-center gap-1">
+                    <span className="w-2 h-2 rounded-full bg-green-500" />
+                    0 Online
+                  </span>
+                  <span className="text-gray-400 flex items-center gap-1">
+                    <span className="w-2 h-2 rounded-full bg-gray-500" />
+                    0 Offline
+                  </span>
+                </div>
+              </div>
+            </Card>
+          </Link>
+        </div>
+      </div>
+
+      
+
+      {/* Real-time Data Monitoring */}
+      <div className="mb-8">
+        <h2 className="text-xl font-bold text-white mb-4 flex items-center gap-2">
+          <Activity className="h-5 w-5 text-blue-400" />
+          Real-time Monitoring
+        </h2>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <RealTimeDataWidget
+            title="System Temperature"
+            data={temperatureData}
+            unit="°C"
+            chartType="area"
+            color="#ef4444"
+            thresholds={{ warning: 30, critical: 35 }}
+            refreshInterval={5000}
+          />
+          <RealTimeDataWidget
+            title="System Pressure"
+            data={pressureData}
+            unit="bar"
+            chartType="line"
+            color="#3b82f6"
+            thresholds={{ warning: 28, critical: 32 }}
+            refreshInterval={5000}
+          />
+        </div>
+      </div>
+
+      {/* SCADA Process View */}
+      <div className="mb-8">
+        <SCADAProcessView
+          title="Industrial Process Overview"
+          nodes={processNodes}
+          autoRefresh={true}
+          refreshInterval={5000}
+          onNodeClick={() => {
+            // Handle node click
+          }}
+        />
+      </div>
+
+      
+
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        {/* Top Entities */}
+        <div className="lg:col-span-2">
+          <Card className="bg-[#1E293B] border-gray-800">
+            <div className="p-6">
+              <div className="flex items-center gap-2 mb-6">
+                <Star className="h-5 w-5 text-blue-400" />
+                <h2 className="text-xl font-bold text-white">Top entities</h2>
+              </div>
+
+              <Tabs value={activeTab} onValueChange={setActiveTab}>
+                <TabsList className="bg-[#0F172A] border-gray-700 mb-6 flex-wrap h-auto">
+                  <TabsTrigger
+                    value="all"
+                    className="data-[state=active]:bg-gray-700 data-[state=active]:text-white"
+                  >
+                    All
+                  </TabsTrigger>
+                  <TabsTrigger
+                    value="applications"
+                    className="data-[state=active]:bg-gray-700 data-[state=active]:text-white"
+                  >
+                    Applications
+                  </TabsTrigger>
+                  <TabsTrigger
+                    value="gateways"
+                    className="data-[state=active]:bg-gray-700 data-[state=active]:text-white"
+                  >
+                    Gateways
+                  </TabsTrigger>
+                  <TabsTrigger
+                    value="end-devices"
+                    className="data-[state=active]:bg-gray-700 data-[state=active]:text-white"
+                  >
+                    End Devices
+                  </TabsTrigger>
+                  <TabsTrigger
+                    value="gsm-devices"
+                    className="data-[state=active]:bg-gray-700 data-[state=active]:text-white"
+                  >
+                    GSM
+                  </TabsTrigger>
+                  <TabsTrigger
+                    value="wifi-devices"
+                    className="data-[state=active]:bg-gray-700 data-[state=active]:text-white"
+                  >
+                    Wi-Fi
+                  </TabsTrigger>
+                  <TabsTrigger
+                    value="bluetooth-devices"
+                    className="data-[state=active]:bg-gray-700 data-[state=active]:text-white"
+                  >
+                    Bluetooth
+                  </TabsTrigger>
+                </TabsList>
+
+                <TabsContent value={activeTab}>
+                  <div className="space-y-1">
+                    {/* Table Header */}
+                    <div className="flex items-center justify-between px-4 py-2 text-sm text-gray-400 border-b border-gray-800">
+                      <div className="flex-1">
+                        <span className="font-medium">TYPE</span>
+                        <span className="ml-16">NAME</span>
+                      </div>
+                      <span className="font-medium">STATUS / LAST SEEN</span>
+                    </div>
+
+                    {/* Entity Rows */}
+                    {filteredEntities.map((entity, index) => (
+                      <EntityRow key={index} {...entity} />
+                    ))}
+                  </div>
+                </TabsContent>
+              </Tabs>
+            </div>
+          </Card>
+        </div>
+
+        {/* Notifications */}
+        <div>
+          <Card className="bg-[#1E293B] border-gray-800">
+            <div className="p-6">
+              <div className="flex items-center justify-between mb-6">
+                <div className="flex items-center gap-2">
+                  <Bell className="h-5 w-5 text-blue-400" />
+                  <h2 className="text-xl font-bold text-white">Notifications</h2>
+                  <span className="bg-blue-600 text-white text-xs px-2 py-0.5 rounded-full">
+                    1
+                  </span>
+                </div>
+                <Link
+                  href="/console/notifications"
+                  className="text-blue-400 hover:text-blue-300 text-sm flex items-center gap-1"
+                >
+                  View all
+                  <ArrowRight className="h-4 w-4" />
+                </Link>
+              </div>
+
+              <div className="space-y-4">
+                {/* Notification Header */}
+                <div className="flex items-center justify-between text-sm text-gray-400 pb-2 border-b border-gray-800">
+                  <span className="font-medium">MESSAGE</span>
+                  <span className="font-medium">TIME</span>
+                </div>
+
+                {/* Notification Items */}
+                {notifications.map((notification) => (
+                  <div
+                    key={notification.id}
+                    className="hover:bg-gray-800/50 rounded p-3 transition-colors cursor-pointer"
+                  >
+                    <div className="flex items-start justify-between mb-2">
+                      <div className="flex items-start gap-2">
+                        <div className="w-2 h-2 rounded-full bg-blue-500 mt-1.5" />
+                        <div>
+                          <h3 className="text-white font-medium mb-1">
+                            {notification.title}
+                          </h3>
+                          <p className="text-gray-400 text-sm">{notification.message}</p>
+                        </div>
+                      </div>
+                      <span className="text-gray-400 text-sm whitespace-nowrap ml-4">
+                        {notification.time}
+                      </span>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </Card>
+
+          {/* Documentation Card */}
+          <Card className="bg-[#1E293B] border-gray-800 mt-6">
+            <div className="p-6">
+              <div className="flex items-center gap-2 mb-4">
+                <Database className="h-5 w-5 text-blue-400" />
+                <h2 className="text-xl font-bold text-white">Documentation</h2>
+              </div>
+              <p className="text-gray-400 text-sm mb-4">
+                Learn more about Space Auto Tech console and LoRaWAN technology.
+              </p>
+              <Button
+                variant="outline"
+                className="w-full border-gray-700 text-gray-300 hover:bg-gray-800"
+                asChild
+              >
+                <Link href="/docs">
+                  Browse Documentation
+                  <ArrowRight className="h-4 w-4 ml-2" />
+                </Link>
+              </Button>
+            </div>
+          </Card>
+
+          {/* Latest News */}
+          <Card className="bg-[#1E293B] border-gray-800 mt-6">
+            <div className="p-6">
+              <div className="flex items-center justify-between mb-4">
+                <h2 className="text-xl font-bold text-white">Latest news</h2>
+                <Link
+                  href="/blog"
+                  className="text-blue-400 hover:text-blue-300 text-sm flex items-center gap-1"
+                >
+                  Blog
+                  <ArrowRight className="h-4 w-4" />
+                </Link>
+              </div>
+              <p className="text-gray-400 text-sm">
+                Stay updated with the latest features and announcements.
+              </p>
+            </div>
+          </Card>
+        </div>
+      </div>
+
+      {/* GIS Map View */}
+      <div className="mt-8">
+        <div className="flex items-center justify-between mb-4">
+          <div className="flex items-center gap-2">
+            <MapPin className="h-5 w-5 text-blue-400" />
+            <h2 className="text-xl font-bold text-white">Network Map View</h2>
+          </div>
+          <Link
+            href="/console/gis"
+            className="text-blue-400 hover:text-blue-300 text-sm flex items-center gap-1"
+          >
+            Full Screen View
+            <ArrowRight className="h-4 w-4" />
+          </Link>
+        </div>
+        <GISDashboard
+          apiKey={process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY || ''}
+          className="h-[600px]"
+        />
+      </div>
+    </div>
+  );
+}

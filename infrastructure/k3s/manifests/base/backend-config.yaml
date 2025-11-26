@@ -1,0 +1,29 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: backend-config
+  namespace: webscada
+  labels:
+    app: backend
+    component: config
+data:
+  # Application settings
+  NODE_ENV: production
+  PORT: '3001'
+  HOST: 0.0.0.0
+  LOG_LEVEL: info
+
+  # CORS settings
+  CORS_ORIGIN: http://localhost:3000
+
+  # WebSocket settings
+  WS_PING_INTERVAL: '30000'
+  WS_PING_TIMEOUT: '5000'
+
+  # Database connection pool
+  DB_POOL_MIN: '2'
+  DB_POOL_MAX: '10'
+
+  # Redis settings
+  REDIS_MAX_RETRIES: '3'
+  REDIS_RETRY_DELAY: '1000'

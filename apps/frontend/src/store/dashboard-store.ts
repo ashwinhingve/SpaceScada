@@ -1,10 +1,11 @@
-import { create } from 'zustand';
+import { create, StateCreator } from 'zustand';
 
-import { ConnectionStatus, DashboardState, DataPoint, DeviceData } from '@/types/dashboard';
+import { ConnectionStatus, DashboardState, DataPoint, DeviceData, DeviceTag } from '@/types/dashboard';
 
 const MAX_HISTORY_SIZE = 100;
 
-export const useDashboardStore = create<DashboardState>((set, get) => ({
+export const useDashboardStore = create<DashboardState>(
+  ((set, get) => ({
   // Initial state
   connectionStatus: ConnectionStatus.DISCONNECTED,
   reconnectAttempts: 0,
@@ -13,12 +14,12 @@ export const useDashboardStore = create<DashboardState>((set, get) => ({
   tagHistory: new Map(),
 
   // Connection actions
-  setConnectionStatus: (status) => {
+  setConnectionStatus: (status: ConnectionStatus) => {
     set({ connectionStatus: status });
   },
 
   incrementReconnectAttempts: () => {
-    set((state) => ({
+    set((state: DashboardState) => ({
       reconnectAttempts: state.reconnectAttempts + 1,
     }));
   },
@@ -28,24 +29,24 @@ export const useDashboardStore = create<DashboardState>((set, get) => ({
   },
 
   // Device actions
-  setDevices: (devices) => {
+  setDevices: (devices: DeviceData[]) => {
     const deviceMap = new Map<string, DeviceData>();
-    devices.forEach((device) => {
+    devices.forEach((device: DeviceData) => {
       deviceMap.set(device.id, device);
     });
     set({ devices: deviceMap });
   },
 
-  updateDevice: (device) => {
-    set((state) => {
+  updateDevice: (device: DeviceData) => {
+    set((state: DashboardState) => {
       const newDevices = new Map(state.devices);
       newDevices.set(device.id, device);
       return { devices: newDevices };
     });
   },
 
-  updateDeviceTags: (deviceId, tags) => {
-    set((state) => {
+  updateDeviceTags: (deviceId: string, tags: DeviceTag[]) => {
+    set((state: DashboardState) => {
       const device = state.devices.get(deviceId);
       if (!device) return state;
 
@@ -60,7 +61,7 @@ export const useDashboardStore = create<DashboardState>((set, get) => ({
 
       // Add data points to history
       const newTagHistory = new Map(state.tagHistory);
-      tags.forEach((tag) => {
+      tags.forEach((tag: DeviceTag) => {
         const history = newTagHistory.get(tag.id) || [];
         const dataPoint: DataPoint = {
           timestamp: tag.timestamp,
@@ -84,14 +85,14 @@ export const useDashboardStore = create<DashboardState>((set, get) => ({
     });
   },
 
-  updateDeviceStatus: (deviceId, status) => {
-    set((state) => {
+  updateDeviceStatus: (deviceId: string, status: string) => {
+    set((state: DashboardState) => {
       const device = state.devices.get(deviceId);
       if (!device) return state;
 
-      const updatedDevice = {
+      const updatedDevice: DeviceData = {
         ...device,
-        status,
+        status: status as 'ONLINE' | 'OFFLINE' | 'ERROR' | 'online' | 'offline' | 'error',
         lastUpdate: new Date().toISOString(),
       };
 
@@ -102,13 +103,13 @@ export const useDashboardStore = create<DashboardState>((set, get) => ({
     });
   },
 
-  setSelectedDevice: (deviceId) => {
+  setSelectedDevice: (deviceId: string | null) => {
     set({ selectedDeviceId: deviceId });
   },
 
   // History actions
-  addDataPoint: (tagId, dataPoint) => {
-    set((state) => {
+  addDataPoint: (tagId: string, dataPoint: DataPoint) => {
+    set((state: DashboardState) => {
       const history = state.tagHistory.get(tagId) || [];
       const updatedHistory = [...history, dataPoint];
 
@@ -124,7 +125,7 @@ export const useDashboardStore = create<DashboardState>((set, get) => ({
     });
   },
 
-  getTagHistory: (tagId) => {
+  getTagHistory: (tagId: string) => {
     return get().tagHistory.get(tagId) || [];
   },
-}));
+})) as StateCreator<DashboardState>);

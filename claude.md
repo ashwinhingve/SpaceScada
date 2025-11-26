@@ -10,7 +10,7 @@
 
 **Type:** Full-stack industrial IoT platform
 **Architecture:** Microservices-based monorepo
-**Deployment:** Kubernetes-native with Docker containers
+**Deployment:** K3s-native with Docker containers
 **Stage:** MVP (Minimum Viable Product)
 
 ## Quick Facts
@@ -19,7 +19,7 @@
 - **Package Manager:** pnpm with workspaces
 - **Build System:** Turbo (monorepo orchestration)
 - **Runtime:** Node.js 18+
-- **Deployment:** Kubernetes + Docker
+- **Deployment:** K3s + Docker
 - **License:** Private
 
 ## Tech Stack
@@ -45,9 +45,9 @@
 ### Infrastructure
 
 - **Container:** Docker + Docker Compose
-- **Orchestration:** Kubernetes (Minikube/Kind for local)
+- **Orchestration:** K3s (Lightweight Kubernetes)
 - **Build:** Skaffold (development)
-- **Deployment:** Helm charts + kubectl manifests
+- **Deployment:** K3s manifests + Helm charts
 - **Monitoring:** Prometheus + Grafana
 
 ### Protocols & Simulation
@@ -67,16 +67,18 @@ webscada/
 │   │   │   ├── websocket.ts      # WebSocket handler
 │   │   │   ├── server.ts         # Fastify server setup
 │   │   │   └── index.ts          # Entry point
+│   │   ├── migrations/           # Database migrations
 │   │   ├── package.json
 │   │   └── tsconfig.json
 │   │
 │   ├── frontend/                  # Next.js web application
 │   │   ├── src/
 │   │   │   ├── app/              # Next.js 14 app router
+│   │   │   │   └── console/      # Console dashboard pages
 │   │   │   ├── components/       # React components
 │   │   │   ├── hooks/            # Custom React hooks
 │   │   │   ├── lib/              # Utilities & API client
-│   │   │   └── styles/           # Global styles
+│   │   │   └── types/            # TypeScript types
 │   │   ├── public/               # Static assets
 │   │   ├── package.json
 │   │   └── next.config.js
@@ -97,26 +99,24 @@ webscada/
 ├── packages/                      # Shared libraries
 │   ├── shared-types/             # TypeScript type definitions
 │   │   ├── src/
-│   │   │   ├── device.ts        # Device types
-│   │   │   ├── tag.ts           # Tag/datapoint types
-│   │   │   ├── alarm.ts         # Alarm types
+│   │   │   ├── devices.ts       # Device types
+│   │   │   ├── esp32.ts         # ESP32 types
+│   │   │   ├── gsm.ts           # GSM types
 │   │   │   └── index.ts
 │   │   └── package.json
 │   │
 │   ├── utils/                    # Shared utilities
 │   │   ├── src/
 │   │   │   ├── logger.ts        # Logging utility
-│   │   │   ├── retry.ts         # Retry logic
 │   │   │   ├── validation.ts    # Validation helpers
-│   │   │   └── time.ts          # Time utilities
+│   │   │   └── index.ts
 │   │   └── package.json
 │   │
-│   └── protocols/                # Industrial protocol handlers
+│   └── protocols/                # Protocol handlers
 │       ├── src/
-│       │   ├── modbus.ts        # Modbus protocol
 │       │   ├── mqtt.ts          # MQTT protocol
-│       │   ├── opcua.ts         # OPC UA protocol
-│       │   └── base.ts          # Base protocol interface
+│       │   ├── lorawan.ts       # LoRaWAN protocol
+│       │   └── index.ts
 │       └── package.json
 │
 ├── infrastructure/                # Deployment configurations
@@ -133,27 +133,66 @@ webscada/
 │   │   ├── ingress.yaml
 │   │   └── README.md
 │   │
-│   └── helm/                     # Helm charts
-│       └── values/
-│           ├── postgresql-values.yaml
-│           └── redis-values.yaml
+│   ├── helm/                     # Helm charts
+│   │   └── values/
+│   │       ├── postgresql-values.yaml
+│   │       └── redis-values.yaml
+│   │
+│   ├── chirpstack/               # ChirpStack LoRaWAN server
+│   ├── database/                 # Database init scripts
+│   └── mosquitto/                # MQTT broker config
+│
+├── documents/                     # ALL PROJECT DOCUMENTATION
+│   ├── README.md                 # Documentation index
+│   ├── architecture/             # System architecture
+│   │   ├── overview.md
+│   │   ├── components.md
+│   │   ├── data-flow.md
+│   │   ├── infra.md
+│   │   ├── frontend-arch.md
+│   │   └── gis-module.md
+│   ├── developer-guides/         # Development guides
+│   │   ├── setup-local.md
+│   │   ├── coding-standards.md
+│   │   ├── contrib-guide.md
+│   │   ├── testing-and-ci.md
+│   │   └── *-integration.md
+│   ├── api/                      # API documentation
+│   │   ├── endpoints.md
+│   │   └── auth.md
+│   ├── operations/               # Deployment & ops
+│   │   ├── deploy.md
+│   │   ├── k8s-manifests.md
+│   │   ├── backup-restore.md
+│   │   └── docker-setup.md
+│   ├── user-guides/              # End-user docs
+│   │   ├── frontend-usage.md
+│   │   └── console-features.md
+│   ├── migrations/               # Change history
+│   │   └── changelog.md
+│   └── assets/                   # Diagrams & images
+│       └── images/diagrams/
+│
+├── firmware/                      # Embedded firmware
+│   └── esp32/                    # ESP32 Arduino firmware
 │
 ├── scripts/                       # Automation scripts
-│   └── k8s-deploy.sh
+│   ├── build-images.sh
+│   ├── dev-setup.sh
+│   ├── k3s-cleanup.sh
+│   └── k3s-deploy.sh
 │
+├── tests/                         # Integration tests
 ├── .husky/                        # Git hooks
 ├── package.json                   # Root package.json
 ├── pnpm-workspace.yaml           # pnpm workspace config
 ├── turbo.json                    # Turbo build config
 ├── docker-compose.yml            # Local Docker setup
+├── docker-compose.production.yml # Production Docker setup
 ├── skaffold.yaml                 # Skaffold dev config
 ├── deploy.sh                     # Deployment automation
-│
-├── ARCHITECTURE.md               # System architecture
-├── DEPLOYMENT.md                 # Deployment procedures (old)
-├── DEPLOYMENT-GUIDE.md           # Comprehensive deployment guide
-├── CODEBASE-VERIFICATION.md      # Verification & fixes report
-└── claude.md                     # This file
+├── README.md                     # Project README
+└── claude.md                     # This file (AI assistant guide)
 ```
 
 ## Key Concepts
@@ -687,17 +726,41 @@ pnpm test:e2e
 
 ### Internal Documentation
 
-All documentation has been organized in the `/docs` directory:
+All documentation has been organized in the `/documents` directory:
 
-- `docs/architecture/ARCHITECTURE.md` - System design and architecture decisions
-- `docs/deployment/DEPLOYMENT-GUIDE.md` - Complete deployment procedures
-- `docs/development/CODEBASE-VERIFICATION.md` - Verification report with all fixes
-- `docs/infrastructure/k8s-readme.md` - Kubernetes deployment details
-- `docs/development/CONTRIBUTING.md` - Contribution guidelines
-- `docs/guides/` - Integration guides for ESP32, GSM, and other devices
-- `docs/frontend/` - Frontend-specific documentation
+**Start Here:**
+- `documents/README.md` - Complete documentation index and navigation guide
 
-See [docs/README.md](./docs/README.md) for the complete documentation index.
+**Architecture:**
+- `documents/architecture/overview.md` - System architecture overview
+- `documents/architecture/components.md` - Component architecture
+- `documents/architecture/data-flow.md` - Data flow and real-time processing
+- `documents/architecture/infra.md` - Infrastructure and deployment topology
+
+**Developer Guides:**
+- `documents/developer-guides/setup-local.md` - Local development setup
+- `documents/developer-guides/coding-standards.md` - Code style and best practices
+- `documents/developer-guides/contrib-guide.md` - Contribution guidelines
+- `documents/developer-guides/testing-and-ci.md` - Testing and CI/CD
+- `documents/developer-guides/*-integration.md` - Device integration guides
+
+**API Documentation:**
+- `documents/api/endpoints.md` - Complete API endpoint reference
+- `documents/api/auth.md` - Authentication and authorization
+
+**Operations:**
+- `documents/operations/deploy.md` - Production deployment guide
+- `documents/operations/k8s-manifests.md` - Kubernetes configuration
+- `documents/operations/backup-restore.md` - Backup and restore procedures
+
+**User Guides:**
+- `documents/user-guides/frontend-usage.md` - Frontend application guide
+- `documents/user-guides/console-features.md` - Console dashboard features
+
+**Migrations:**
+- `documents/migrations/changelog.md` - Complete changelog and migration notes
+
+See [documents/README.md](./documents/README.md) for the complete documentation index.
 
 ### External Resources
 
@@ -789,6 +852,7 @@ chore: update dependencies
 
 ---
 
-**Last Updated:** 2025-11-13
-**Version:** 1.0.0
+**Last Updated:** 2025-11-25
+**Version:** 2.0.0
 **Codebase Status:** ✅ Verified and Operational
+**Documentation:** Comprehensive documentation in `/documents` directory

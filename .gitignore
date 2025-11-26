@@ -3,11 +3,23 @@ node_modules/
 .pnp
 .pnp.js
 .yarn/
+.pnpm-store/
+.pnpm-debug.log
+
+# pnpm store in D drive (WSL2 specific issue)
+D:/.pnpm-store/
+D/
+
+# Any drive letter directories (WSL2 artifacts)
+[A-Z]:/
 
 # Testing
 coverage/
 *.log
 .nyc_output/
+jest-coverage/
+playwright-report/
+test-results/
 
 # Production builds
 dist/
@@ -15,10 +27,15 @@ build/
 .next/
 out/
 *.tsbuildinfo
+.vercel
+.netlify
 
 # Misc
 .DS_Store
 *.pem
+*.pid
+*.seed
+*.pid.lock
 
 # Environment variables
 .env
@@ -26,6 +43,8 @@ out/
 .env.development.local
 .env.test.local
 .env.production.local
+*.env
+.env.backup
 
 # Debug logs
 npm-debug.log*
@@ -38,6 +57,11 @@ lerna-debug.log*
 .turbo
 turbo.log
 
+# AI Tools
+.qodo
+.cursor/
+.continue/
+
 # IDE
 .idea/
 *.swp
@@ -48,6 +72,7 @@ turbo.log
 .project
 .classpath
 .settings/
+*.code-workspace
 
 # VS Code - keep workspace settings, ignore user settings
 .vscode/*
@@ -62,21 +87,62 @@ turbo.log
 Thumbs.db
 *.tmp
 *.temp
+desktop.ini
+ehthumbs.db
 
 # Docker
 *.tar
 docker-compose.override.yml
+.dockerignore
 
 # Kubernetes
 *.kubeconfig
 secrets/
 *.secret.yaml
+*.sealed-secret.yaml
 
 # Build artifacts
 *.tgz
 *.zip
+*.tar.gz
 
 # Cache
 .cache/
 .eslintcache
 .stylelintcache
+.parcel-cache/
+.vite/
+
+# Database
+*.db
+*.sqlite
+*.sqlite3
+data/
+pgdata/
+
+# Redis
+dump.rdb
+appendonly.aof
+
+# Local configuration
+.local/
+local.settings.json
+
+# Generated files
+*.generated.ts
+*.generated.tsx
+schema.prisma.generated
+
+# Backup files
+*.backup
+*.bak
+*.old
+
+# Lock files (except pnpm-lock.yaml)
+package-lock.json
+yarn.lock
+
+# Temporary directories
+tmp/
+temp/
+.tmp/

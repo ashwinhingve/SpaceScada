@@ -19,7 +19,7 @@
 #
 # Options:
 #   -e, --env ENV       Environment (dev, staging, prod)
-#   -n, --namespace NS  Kubernetes namespace (default: webscada)
+#   -n, --namespace NS  K3s namespace (default: webscada-dev)
 #   -v, --version VER   Version to deploy
 #   --skip-tests        Skip pre-deployment tests
 #   --dry-run           Show what would be deployed
@@ -36,14 +36,14 @@ BLUE='\033[0;34m'
 NC='\033[0m' # No Color
 
 # Default values
-NAMESPACE="webscada"
+NAMESPACE="webscada-dev"
 ENV="dev"
 COMMAND=""
 VERSION=""
 SKIP_TESTS=false
 DRY_RUN=false
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-K8S_DIR="${SCRIPT_DIR}/infrastructure/k8s"
+K3S_DIR="${SCRIPT_DIR}/infrastructure/k3s/manifests"
 HELM_DIR="${SCRIPT_DIR}/infrastructure/helm"
 
 # Logging functions
@@ -125,9 +125,9 @@ check_prerequisites() {
         exit 1
     fi
 
-    # Check Kubernetes connection
+    # Check K3s connection
     if ! kubectl cluster-info &> /dev/null; then
-        log_error "Cannot connect to Kubernetes cluster"
+        log_error "Cannot connect to K3s cluster"
         exit 1
     fi
 
@@ -230,10 +230,10 @@ deploy_config() {
     log_info "Deploying ConfigMaps and Secrets..."
 
     local manifests=(
-        "${K8S_DIR}/base/postgres-config.yaml"
-        "${K8S_DIR}/base/backend-config.yaml"
-        "${K8S_DIR}/base/backend-secrets.yaml"
-        "${K8S_DIR}/base/frontend-config.yaml"
+        "${K3S_DIR}/base/postgres-config.yaml"
+        "${K3S_DIR}/base/backend-config.yaml"
+        "${K3S_DIR}/base/backend-secrets.yaml"
+        "${K3S_DIR}/base/frontend-config.yaml"
     )
 
     for manifest in "${manifests[@]}"; do
@@ -255,12 +255,12 @@ deploy_app() {
     log_info "Deploying application components..."
 
     local manifests=(
-        "${K8S_DIR}/postgres-deployment.yaml"
-        "${K8S_DIR}/redis-deployment.yaml"
-        "${K8S_DIR}/backend-deployment.yaml"
-        "${K8S_DIR}/frontend-deployment.yaml"
-        "${K8S_DIR}/simulator-deployment.yaml"
-        "${K8S_DIR}/ingress.yaml"
+        "${K3S_DIR}/postgres-deployment.yaml"
+        "${K3S_DIR}/redis-deployment.yaml"
+        "${K3S_DIR}/backend-deployment.yaml"
+        "${K3S_DIR}/frontend-deployment.yaml"
+        "${K3S_DIR}/simulator-deployment.yaml"
+        "${K3S_DIR}/ingress.yaml"
     )
 
     for manifest in "${manifests[@]}"; do
@@ -281,11 +281,11 @@ deploy_app() {
 deploy_monitoring() {
     log_info "Deploying monitoring components..."
 
-    if [[ -f "${K8S_DIR}/monitoring/servicemonitor.yaml" ]]; then
+    if [[ -f "${K3S_DIR}/monitoring/servicemonitor.yaml" ]]; then
         if [[ "$DRY_RUN" == true ]]; then
-            kubectl apply -f "${K8S_DIR}/monitoring/servicemonitor.yaml" -n "$NAMESPACE" --dry-run=client
+            kubectl apply -f "${K3S_DIR}/monitoring/servicemonitor.yaml" -n "$NAMESPACE" --dry-run=client
         else
-            kubectl apply -f "${K8S_DIR}/monitoring/servicemonitor.yaml" -n "$NAMESPACE" 2>/dev/null || \
+            kubectl apply -f "${K3S_DIR}/monitoring/servicemonitor.yaml" -n "$NAMESPACE" 2>/dev/null || \
                 log_warning "Could not deploy ServiceMonitor (Prometheus Operator may not be installed)"
         fi
     fi

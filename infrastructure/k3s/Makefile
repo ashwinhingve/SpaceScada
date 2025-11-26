@@ -103,14 +103,16 @@ verify: ## Verify all components are running
 
 deploy-scada: ## Deploy WebSCADA applications
 	@echo '$(BLUE)Deploying WebSCADA stack...$(NC)'
-	@cd ../../.. && kubectl apply -f infrastructure/k8s/postgres-deployment.yaml
-	@cd ../../.. && kubectl apply -f infrastructure/k8s/redis-deployment.yaml
+	@kubectl apply -f manifests/base/
+	@kubectl apply -f manifests/postgres-deployment.yaml
+	@kubectl apply -f manifests/redis-deployment.yaml
 	@echo '$(YELLOW)Waiting for databases...$(NC)'
 	@kubectl wait --for=condition=ready pod -l app=postgres -n webscada-dev --timeout=300s
 	@kubectl wait --for=condition=ready pod -l app=redis -n webscada-dev --timeout=300s
-	@cd ../../.. && kubectl apply -f infrastructure/k8s/backend-deployment.yaml
-	@cd ../../.. && kubectl apply -f infrastructure/k8s/frontend-deployment.yaml
-	@cd ../../.. && kubectl apply -f infrastructure/k8s/simulator-deployment.yaml
+	@kubectl apply -f manifests/backend-deployment.yaml
+	@kubectl apply -f manifests/frontend-deployment.yaml
+	@kubectl apply -f manifests/simulator-deployment.yaml
+	@kubectl apply -f manifests/ingress.yaml
 	@echo '$(YELLOW)Waiting for applications...$(NC)'
 	@kubectl wait --for=condition=available deployment --all -n webscada-dev --timeout=300s
 	@echo ''

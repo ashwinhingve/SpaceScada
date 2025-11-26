@@ -2,6 +2,7 @@ import { FastifyInstance, FastifyRequest, FastifyReply } from 'fastify';
 import {
   ESP32Device,
   ESP32ControlCommand,
+  ESP32SensorConfig,
   DeviceType,
   DeviceStatus,
   ProtocolType,
@@ -14,7 +15,10 @@ const logger = createLogger({ prefix: 'ESP32Routes' });
 
 interface RegisterDeviceBody {
   name: string;
+  deviceId?: string;
   sensorType: ESP32SensorType;
+  mqttClientId?: string;
+  mqttTopic?: string;
   mqttBroker?: string;
   mqttPort?: number;
   mqttUsername?: string;
@@ -22,6 +26,7 @@ interface RegisterDeviceBody {
   wifiSSID?: string;
   publishInterval?: number;
   heartbeatInterval?: number;
+  sensors?: ESP32SensorConfig[];
   gpioConfig?: {
     dataPin?: number;
     ledPin?: number;
@@ -132,16 +137,25 @@ export const esp32Routes = async (server: FastifyInstance) => {
         // Create device object
         const device: ESP32Device = {
           id: deviceId,
+          device_id: deviceId,
           name: body.name,
           type: DeviceType.SENSOR,
           status: DeviceStatus.OFFLINE,
           protocol: ProtocolType.MQTT,
+          config: {
+            mqttClientId: body.mqttClientId || `esp32_${Date.now()}`,
+            mqttTopic: body.mqttTopic || `esp32/${body.deviceId || 'default'}`,
+            publishInterval: body.publishInterval || 5000,
+            sensors: body.sensors || [],
+          },
           connectionConfig: {
             host: body.mqttBroker || 'localhost',
             port: body.mqttPort || 1883,
           },
           tags: [],
           esp32Config: {
+            mqttClientId: body.mqttClientId || `esp32_${Date.now()}`,
+            mqttTopic: body.mqttTopic || `esp32/${body.deviceId || 'default'}`,
             mqttBroker: body.mqttBroker || 'localhost',
             mqttPort: body.mqttPort || 1883,
             mqttUsername: body.mqttUsername,
@@ -150,10 +164,11 @@ export const esp32Routes = async (server: FastifyInstance) => {
             publishInterval: body.publishInterval || 5000,
             heartbeatInterval: body.heartbeatInterval || 15000,
             sensorType: body.sensorType,
+            sensors: body.sensors || [],
             gpioConfig: body.gpioConfig,
           },
-          createdAt: new Date(),
-          updatedAt: new Date(),
+          created_at: new Date(),
+          updated_at: new Date(),
         };
 
         // Register device
@@ -205,23 +220,26 @@ export const esp32Routes = async (server: FastifyInstance) => {
         }
 
         // Update device configuration
+        const existingConfig: any = existingDevice.esp32Config || existingDevice.config;
         const updatedDevice: ESP32Device = {
           ...existingDevice,
           name: body.name || existingDevice.name,
           esp32Config: {
-            ...existingDevice.esp32Config,
-            mqttBroker: body.mqttBroker || existingDevice.esp32Config.mqttBroker,
-            mqttPort: body.mqttPort || existingDevice.esp32Config.mqttPort,
-            mqttUsername: body.mqttUsername || existingDevice.esp32Config.mqttUsername,
-            mqttPassword: body.mqttPassword || existingDevice.esp32Config.mqttPassword,
-            wifiSSID: body.wifiSSID || existingDevice.esp32Config.wifiSSID,
-            publishInterval: body.publishInterval || existingDevice.esp32Config.publishInterval,
+            mqttClientId: body.mqttClientId || existingConfig?.mqttClientId || `esp32_${Date.now()}`,
+            mqttTopic: body.mqttTopic || existingConfig?.mqttTopic || `esp32/${existingDevice.device_id}`,
+            mqttBroker: body.mqttBroker || existingConfig?.mqttBroker || 'localhost',
+            mqttPort: body.mqttPort || existingConfig?.mqttPort || 1883,
+            mqttUsername: body.mqttUsername || existingConfig?.mqttUsername,
+            mqttPassword: body.mqttPassword || existingConfig?.mqttPassword,
+            wifiSSID: body.wifiSSID || existingConfig?.wifiSSID,
+            publishInterval: body.publishInterval || existingConfig?.publishInterval || 5000,
             heartbeatInterval:
-              body.heartbeatInterval || existingDevice.esp32Config.heartbeatInterval,
-            sensorType: body.sensorType || existingDevice.esp32Config.sensorType,
-            gpioConfig: body.gpioConfig || existingDevice.esp32Config.gpioConfig,
+              body.heartbeatInterval || existingConfig?.heartbeatInterval || 15000,
+            sensorType: body.sensorType || existingConfig?.sensorType,
+            sensors: body.sensors || existingConfig?.sensors || [],
+            gpioConfig: body.gpioConfig || existingConfig?.gpioConfig,
           },
-          updatedAt: new Date(),
+          updated_at: new Date(),
         };
 
         // Re-register device with updated config

@@ -69,8 +69,16 @@ export interface ESP32Device {
   esp32Config?: {
     mqttClientId: string;
     mqttTopic: string;
+    mqttBroker?: string;
+    mqttPort?: number;
+    mqttUsername?: string;
+    mqttPassword?: string;
+    wifiSSID?: string;
     publishInterval: number;
+    heartbeatInterval?: number;
+    sensorType?: ESP32SensorType;
     sensors: ESP32SensorConfig[];
+    gpioConfig?: any;
     [key: string]: any;
   };
 

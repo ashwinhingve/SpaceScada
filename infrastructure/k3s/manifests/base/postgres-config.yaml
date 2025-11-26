@@ -1,0 +1,29 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: postgres-config
+  namespace: webscada
+  labels:
+    app: postgres
+    component: config
+data:
+  POSTGRES_DB: webscada
+  POSTGRES_USER: webscada
+  # PostgreSQL tuning for SCADA workload
+  POSTGRES_MAX_CONNECTIONS: '100'
+  POSTGRES_SHARED_BUFFERS: '256MB'
+  POSTGRES_EFFECTIVE_CACHE_SIZE: '1GB'
+  POSTGRES_WORK_MEM: '4MB'
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: postgres-secret
+  namespace: webscada
+  labels:
+    app: postgres
+    component: secret
+type: Opaque
+stringData:
+  POSTGRES_PASSWORD: webscada_password
+  # For production, use SealedSecret with strong password

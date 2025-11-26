@@ -16,7 +16,7 @@ export function NetworkStatusCard({ status }: NetworkStatusCardProps) {
     return `${(bytes / Math.pow(k, i)).toFixed(2)} ${sizes[i]}`;
   };
 
-  const networkTypeLabel = {
+  const networkTypeLabel: Record<string, string> = {
     GSM: '2G',
     GPRS: '2.5G',
     EDGE: '2.75G',
@@ -27,12 +27,13 @@ export function NetworkStatusCard({ status }: NetworkStatusCardProps) {
     UNKNOWN: 'Unknown',
   };
 
-  const simStatusColors = {
+  const simStatusColors: Record<string, string> = {
     READY: 'text-green-600 bg-green-100 dark:bg-green-900/20',
     PIN_REQUIRED: 'text-yellow-600 bg-yellow-100 dark:bg-yellow-900/20',
     PUK_REQUIRED: 'text-red-600 bg-red-100 dark:bg-red-900/20',
     NOT_INSERTED: 'text-gray-600 bg-gray-100 dark:bg-gray-900/20',
     ERROR: 'text-red-600 bg-red-100 dark:bg-red-900/20',
+    NOT_READY: 'text-gray-600 bg-gray-100 dark:bg-gray-900/20',
   };
 
   return (
@@ -90,11 +91,11 @@ export function NetworkStatusCard({ status }: NetworkStatusCardProps) {
           <>
             <div>
               <p className="text-xs text-gray-500 dark:text-gray-400">Data Sent</p>
-              <p className="font-medium">{formatBytes(status.dataUsage.sentBytes)}</p>
+              <p className="font-medium">{formatBytes(status.dataUsage.sent)}</p>
             </div>
             <div>
               <p className="text-xs text-gray-500 dark:text-gray-400">Data Received</p>
-              <p className="font-medium">{formatBytes(status.dataUsage.receivedBytes)}</p>
+              <p className="font-medium">{formatBytes(status.dataUsage.received)}</p>
             </div>
           </>
         )}

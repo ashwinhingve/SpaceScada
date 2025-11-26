@@ -12,17 +12,29 @@ import {
   SMSStatus,
 } from '@webscada/shared-types';
 import { GSMService } from '../services/gsm.service';
+import { TelemetryService } from '../services/telemetry.service';
+import { LogsService } from '../services/logs.service';
 
 /**
  * GSM Device Routes
  * Handles all GSM device operations including SMS, GPS, and network monitoring
  */
 export const gsmRoutes = async (server: FastifyInstance) => {
-  // Initialize GSM service
+  // Initialize services
   const gsmService = (server as any).gsmService as GSMService;
+  const telemetryService: TelemetryService = (server as any).telemetryService;
+  const logsService: LogsService = (server as any).logsService;
 
   if (!gsmService) {
     throw new Error('GSM Service not initialized');
+  }
+
+  if (!telemetryService) {
+    throw new Error('TelemetryService not initialized');
+  }
+
+  if (!logsService) {
+    throw new Error('LogsService not initialized');
   }
 
   // GET /api/gsm - List all GSM devices
@@ -412,6 +424,505 @@ export const gsmRoutes = async (server: FastifyInstance) => {
           success: false,
           error: {
             code: 'COMMAND_HISTORY_FAILED',
+            message: (error as Error).message,
+          },
+          timestamp: new Date(),
+        };
+        return reply.status(500).send(response);
+      }
+    }
+  );
+
+  // =============================================
+  // TELEMETRY ENDPOINTS
+  // =============================================
+
+  /**
+   * Get device telemetry
+   * GET /api/gsm/:id/telemetry
+   */
+  server.get<{ Params: { id: string } }>(
+    '/:id/telemetry',
+    async (request: FastifyRequest<{ Params: { id: string } }>, reply: FastifyReply) => {
+      try {
+        const { id } = request.params;
+        const {
+          metric_name,
+          start_time,
+          end_time,
+          limit,
+          aggregation,
+        } = request.query as any;
+
+        const query: any = {
+          device_id: id,
+          device_type: 'gsm',
+          metric_name,
+          limit: limit ? parseInt(limit) : 1000,
+        };
+
+        if (start_time) query.start_time = new Date(start_time);
+        if (end_time) query.end_time = new Date(end_time);
+
+        let telemetry;
+        if (aggregation === 'hourly' || aggregation === 'daily') {
+          query.aggregation = aggregation;
+          telemetry = await telemetryService.getAggregatedTelemetry(query);
+        } else {
+          telemetry = await telemetryService.getTelemetry(query);
+        }
+
+        const response: ApiResponse = {
+          success: true,
+          data: telemetry,
+          timestamp: new Date(),
+        };
+        return reply.send(response);
+      } catch (error) {
+        const response: ApiResponse = {
+          success: false,
+          error: {
+            code: 'TELEMETRY_FETCH_FAILED',
+            message: (error as Error).message,
+          },
+          timestamp: new Date(),
+        };
+        return reply.status(500).send(response);
+      }
+    }
+  );
+
+  /**
+   * Get latest telemetry for device
+   * GET /api/gsm/:id/telemetry/latest
+   */
+  server.get<{ Params: { id: string } }>(
+    '/:id/telemetry/latest',
+    async (request: FastifyRequest<{ Params: { id: string } }>, reply: FastifyReply) => {
+      try {
+        const { id } = request.params;
+        const latest = await telemetryService.getLatestTelemetry(id, 'gsm');
+
+        const response: ApiResponse = {
+          success: true,
+          data: latest,
+          timestamp: new Date(),
+        };
+        return reply.send(response);
+      } catch (error) {
+        const response: ApiResponse = {
+          success: false,
+          error: {
+            code: 'TELEMETRY_FETCH_FAILED',
+            message: (error as Error).message,
+          },
+          timestamp: new Date(),
+        };
+        return reply.status(500).send(response);
+      }
+    }
+  );
+
+  /**
+   * Record telemetry data point
+   * POST /api/gsm/:id/telemetry
+   */
+  server.post<{ Params: { id: string } }>(
+    '/:id/telemetry',
+    async (request: FastifyRequest<{ Params: { id: string } }>, reply: FastifyReply) => {
+      try {
+        const { id } = request.params;
+        const { metric_name, metric_value, metric_unit, metadata, timestamp } = request.body as any;
+
+        if (!metric_name || metric_value === undefined) {
+          const response: ApiResponse = {
+            success: false,
+            error: {
+              code: 'VALIDATION_ERROR',
+              message: 'Missing required fields: metric_name, metric_value',
+            },
+            timestamp: new Date(),
+          };
+          return reply.status(400).send(response);
+        }
+
+        const telemetry = await telemetryService.recordTelemetry({
+          device_id: id,
+          device_type: 'gsm',
+          metric_name,
+          metric_value: parseFloat(metric_value),
+          metric_unit,
+          metadata,
+          timestamp: timestamp ? new Date(timestamp) : undefined,
+        });
+
+        const response: ApiResponse = {
+          success: true,
+          data: telemetry,
+          timestamp: new Date(),
+        };
+        return reply.status(201).send(response);
+      } catch (error) {
+        const response: ApiResponse = {
+          success: false,
+          error: {
+            code: 'TELEMETRY_RECORD_FAILED',
+            message: (error as Error).message,
+          },
+          timestamp: new Date(),
+        };
+        return reply.status(500).send(response);
+      }
+    }
+  );
+
+  /**
+   * Get telemetry statistics
+   * GET /api/gsm/:id/telemetry/stats
+   */
+  server.get<{ Params: { id: string } }>(
+    '/:id/telemetry/stats',
+    async (request: FastifyRequest<{ Params: { id: string } }>, reply: FastifyReply) => {
+      try {
+        const { id } = request.params;
+        const { metric_name } = request.query as any;
+
+        const stats = await telemetryService.getTelemetryStats(id, 'gsm', metric_name);
+
+        const response: ApiResponse = {
+          success: true,
+          data: stats,
+          timestamp: new Date(),
+        };
+        return reply.send(response);
+      } catch (error) {
+        const response: ApiResponse = {
+          success: false,
+          error: {
+            code: 'TELEMETRY_STATS_FAILED',
+            message: (error as Error).message,
+          },
+          timestamp: new Date(),
+        };
+        return reply.status(500).send(response);
+      }
+    }
+  );
+
+  // =============================================
+  // LOGS ENDPOINTS
+  // =============================================
+
+  /**
+   * Get device logs
+   * GET /api/gsm/:id/logs
+   */
+  server.get<{ Params: { id: string } }>(
+    '/:id/logs',
+    async (request: FastifyRequest<{ Params: { id: string } }>, reply: FastifyReply) => {
+      try {
+        const { id } = request.params;
+        const {
+          log_level,
+          event_type,
+          start_time,
+          end_time,
+          limit,
+        } = request.query as any;
+
+        const query: any = {
+          device_id: id,
+          device_type: 'gsm',
+          log_level,
+          event_type,
+          limit: limit ? parseInt(limit) : 1000,
+        };
+
+        if (start_time) query.start_time = new Date(start_time);
+        if (end_time) query.end_time = new Date(end_time);
+
+        const logs = await logsService.getLogs(query);
+
+        const response: ApiResponse = {
+          success: true,
+          data: logs,
+          timestamp: new Date(),
+        };
+        return reply.send(response);
+      } catch (error) {
+        const response: ApiResponse = {
+          success: false,
+          error: {
+            code: 'LOGS_FETCH_FAILED',
+            message: (error as Error).message,
+          },
+          timestamp: new Date(),
+        };
+        return reply.status(500).send(response);
+      }
+    }
+  );
+
+  /**
+   * Get device error logs
+   * GET /api/gsm/:id/logs/errors
+   */
+  server.get<{ Params: { id: string } }>(
+    '/:id/logs/errors',
+    async (request: FastifyRequest<{ Params: { id: string } }>, reply: FastifyReply) => {
+      try {
+        const { id } = request.params;
+        const { limit } = request.query as any;
+
+        const logs = await logsService.getErrorLogs(id, limit ? parseInt(limit) : 100);
+
+        const response: ApiResponse = {
+          success: true,
+          data: logs,
+          timestamp: new Date(),
+        };
+        return reply.send(response);
+      } catch (error) {
+        const response: ApiResponse = {
+          success: false,
+          error: {
+            code: 'LOGS_FETCH_FAILED',
+            message: (error as Error).message,
+          },
+          timestamp: new Date(),
+        };
+        return reply.status(500).send(response);
+      }
+    }
+  );
+
+  /**
+   * Get recent device logs
+   * GET /api/gsm/:id/logs/recent
+   */
+  server.get<{ Params: { id: string } }>(
+    '/:id/logs/recent',
+    async (request: FastifyRequest<{ Params: { id: string } }>, reply: FastifyReply) => {
+      try {
+        const { id } = request.params;
+        const { limit } = request.query as any;
+
+        const logs = await logsService.getRecentLogs(id, limit ? parseInt(limit) : 100);
+
+        const response: ApiResponse = {
+          success: true,
+          data: logs,
+          timestamp: new Date(),
+        };
+        return reply.send(response);
+      } catch (error) {
+        const response: ApiResponse = {
+          success: false,
+          error: {
+            code: 'LOGS_FETCH_FAILED',
+            message: (error as Error).message,
+          },
+          timestamp: new Date(),
+        };
+        return reply.status(500).send(response);
+      }
+    }
+  );
+
+  /**
+   * Create device log entry
+   * POST /api/gsm/:id/logs
+   */
+  server.post<{ Params: { id: string } }>(
+    '/:id/logs',
+    async (request: FastifyRequest<{ Params: { id: string } }>, reply: FastifyReply) => {
+      try {
+        const { id } = request.params;
+        const { log_level, event_type, message, details, timestamp } = request.body as any;
+
+        if (!log_level || !event_type || !message) {
+          const response: ApiResponse = {
+            success: false,
+            error: {
+              code: 'VALIDATION_ERROR',
+              message: 'Missing required fields: log_level, event_type, message',
+            },
+            timestamp: new Date(),
+          };
+          return reply.status(400).send(response);
+        }
+
+        const log = await logsService.createLog({
+          device_id: id,
+          device_type: 'gsm',
+          log_level,
+          event_type,
+          message,
+          details,
+          timestamp: timestamp ? new Date(timestamp) : undefined,
+        });
+
+        const response: ApiResponse = {
+          success: true,
+          data: log,
+          timestamp: new Date(),
+        };
+        return reply.status(201).send(response);
+      } catch (error) {
+        const response: ApiResponse = {
+          success: false,
+          error: {
+            code: 'LOG_CREATE_FAILED',
+            message: (error as Error).message,
+          },
+          timestamp: new Date(),
+        };
+        return reply.status(500).send(response);
+      }
+    }
+  );
+
+  /**
+   * Get log statistics
+   * GET /api/gsm/:id/logs/stats
+   */
+  server.get<{ Params: { id: string } }>(
+    '/:id/logs/stats',
+    async (request: FastifyRequest<{ Params: { id: string } }>, reply: FastifyReply) => {
+      try {
+        const { id } = request.params;
+        const stats = await logsService.getLogStats(id);
+
+        const response: ApiResponse = {
+          success: true,
+          data: stats,
+          timestamp: new Date(),
+        };
+        return reply.send(response);
+      } catch (error) {
+        const response: ApiResponse = {
+          success: false,
+          error: {
+            code: 'LOG_STATS_FAILED',
+            message: (error as Error).message,
+          },
+          timestamp: new Date(),
+        };
+        return reply.status(500).send(response);
+      }
+    }
+  );
+
+  // =============================================
+  // CONFIGURATION ENDPOINTS
+  // =============================================
+
+  /**
+   * Get active device configuration
+   * GET /api/gsm/:id/configuration
+   */
+  server.get<{ Params: { id: string } }>(
+    '/:id/configuration',
+    async (request: FastifyRequest<{ Params: { id: string } }>, reply: FastifyReply) => {
+      try {
+        const { id } = request.params;
+        const config = await logsService.getActiveConfiguration(id);
+
+        const response: ApiResponse = {
+          success: true,
+          data: config,
+          timestamp: new Date(),
+        };
+        return reply.send(response);
+      } catch (error) {
+        const response: ApiResponse = {
+          success: false,
+          error: {
+            code: 'CONFIG_FETCH_FAILED',
+            message: (error as Error).message,
+          },
+          timestamp: new Date(),
+        };
+        return reply.status(500).send(response);
+      }
+    }
+  );
+
+  /**
+   * Save device configuration
+   * POST /api/gsm/:id/configuration
+   */
+  server.post<{ Params: { id: string } }>(
+    '/:id/configuration',
+    async (request: FastifyRequest<{ Params: { id: string } }>, reply: FastifyReply) => {
+      try {
+        const { id } = request.params;
+        const { configuration, changed_by, change_reason } = request.body as any;
+
+        if (!configuration) {
+          const response: ApiResponse = {
+            success: false,
+            error: {
+              code: 'VALIDATION_ERROR',
+              message: 'Missing required field: configuration',
+            },
+            timestamp: new Date(),
+          };
+          return reply.status(400).send(response);
+        }
+
+        const config = await logsService.saveConfiguration(
+          id,
+          'gsm',
+          configuration,
+          changed_by,
+          change_reason
+        );
+
+        const response: ApiResponse = {
+          success: true,
+          data: config,
+          timestamp: new Date(),
+        };
+        return reply.status(201).send(response);
+      } catch (error) {
+        const response: ApiResponse = {
+          success: false,
+          error: {
+            code: 'CONFIG_SAVE_FAILED',
+            message: (error as Error).message,
+          },
+          timestamp: new Date(),
+        };
+        return reply.status(500).send(response);
+      }
+    }
+  );
+
+  /**
+   * Get configuration history
+   * GET /api/gsm/:id/configuration/history
+   */
+  server.get<{ Params: { id: string } }>(
+    '/:id/configuration/history',
+    async (request: FastifyRequest<{ Params: { id: string } }>, reply: FastifyReply) => {
+      try {
+        const { id } = request.params;
+        const { limit } = request.query as any;
+
+        const history = await logsService.getConfigurationHistory(id, limit ? parseInt(limit) : 50);
+
+        const response: ApiResponse = {
+          success: true,
+          data: history,
+          timestamp: new Date(),
+        };
+        return reply.send(response);
+      } catch (error) {
+        const response: ApiResponse = {
+          success: false,
+          error: {
+            code: 'CONFIG_HISTORY_FAILED',
             message: (error as Error).message,
           },
           timestamp: new Date(),

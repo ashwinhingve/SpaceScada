@@ -1,6 +1,6 @@
 # Default values for webscada
 
-namespace: webscada
+namespace: webscada-dev
 
 # Frontend configuration
 frontend:

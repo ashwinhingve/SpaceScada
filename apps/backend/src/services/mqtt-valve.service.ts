@@ -70,7 +70,7 @@ class MQTTValveService {
       }
     });
 
-    this.client.on('error', (error) => {
+    this.client.on('error', (error: Error) => {
       logger.error('MQTT Error:', error);
     });
 
@@ -100,7 +100,7 @@ class MQTTValveService {
     ];
 
     topics.forEach((topic) => {
-      this.client!.subscribe(topic, { qos: 1 }, (err) => {
+      this.client!.subscribe(topic, { qos: 1 }, (err: Error | null) => {
         if (err) {
           logger.error(`Failed to subscribe to ${topic}:`, err);
         } else {
@@ -187,8 +187,8 @@ class MQTTValveService {
 
     const topic = `scada/devices/${this.deviceId}/command/valve_control`;
 
-    return new Promise((resolve, reject) => {
-      this.client!.publish(topic, JSON.stringify(command), { qos: 1 }, (error) => {
+    return new Promise<void>((resolve, reject) => {
+      this.client!.publish(topic, JSON.stringify(command), { qos: 1 }, (error?: Error) => {
         if (error) {
           logger.error('Failed to publish valve command:', error);
           reject(error);

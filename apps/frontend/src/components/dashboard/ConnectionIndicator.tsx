@@ -4,7 +4,7 @@ import { AlertTriangle, Loader2, Wifi, WifiOff } from 'lucide-react';
 
 import { cn } from '@/lib/utils';
 import { useDashboardStore } from '@/store/dashboard-store';
-import { ConnectionStatus } from '@/types/dashboard';
+import { ConnectionStatus } from '@webscada/shared-types';
 
 interface ConnectionIndicatorProps {
   className?: string;

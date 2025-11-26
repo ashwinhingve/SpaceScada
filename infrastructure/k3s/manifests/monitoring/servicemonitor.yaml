@@ -1,0 +1,157 @@
+---
+# ServiceMonitor for Backend metrics
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: backend-metrics
+  namespace: webscada
+  labels:
+    app: backend
+    release: prometheus
+spec:
+  selector:
+    matchLabels:
+      app: backend
+  endpoints:
+    - port: http
+      path: /metrics
+      interval: 30s
+      scrapeTimeout: 10s
+      scheme: http
+  namespaceSelector:
+    matchNames:
+      - webscada
+---
+# ServiceMonitor for Frontend metrics (if Next.js exports metrics)
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: frontend-metrics
+  namespace: webscada
+  labels:
+    app: frontend
+    release: prometheus
+spec:
+  selector:
+    matchLabels:
+      app: frontend
+  endpoints:
+    - port: http
+      path: /api/metrics
+      interval: 30s
+      scrapeTimeout: 10s
+      scheme: http
+  namespaceSelector:
+    matchNames:
+      - webscada
+---
+# PodMonitor for more detailed pod metrics
+apiVersion: monitoring.coreos.com/v1
+kind: PodMonitor
+metadata:
+  name: webscada-pods
+  namespace: webscada
+  labels:
+    app: webscada
+    release: prometheus
+spec:
+  selector:
+    matchLabels:
+      app: backend
+  podMetricsEndpoints:
+    - port: http
+      path: /metrics
+      interval: 30s
+  namespaceSelector:
+    matchNames:
+      - webscada
+---
+# PrometheusRule for alerting
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  name: webscada-alerts
+  namespace: webscada
+  labels:
+    app: webscada
+    release: prometheus
+spec:
+  groups:
+    - name: webscada.rules
+      interval: 30s
+      rules:
+        # Backend pod availability
+        - alert: BackendPodDown
+          expr: up{job="backend-metrics"} == 0
+          for: 1m
+          labels:
+            severity: critical
+            component: backend
+          annotations:
+            summary: 'Backend pod is down'
+            description: 'Backend pod {{ $labels.pod }} in namespace {{ $labels.namespace }} has been down for more than 1 minute.'
+
+        # High CPU usage
+        - alert: HighCPUUsage
+          expr: rate(container_cpu_usage_seconds_total{namespace="webscada",pod=~"backend.*"}[5m]) > 0.8
+          for: 5m
+          labels:
+            severity: warning
+            component: backend
+          annotations:
+            summary: 'High CPU usage detected'
+            description: 'Pod {{ $labels.pod }} has high CPU usage (> 80%) for more than 5 minutes.'
+
+        # High memory usage
+        - alert: HighMemoryUsage
+          expr: container_memory_working_set_bytes{namespace="webscada",pod=~"backend.*"} / container_spec_memory_limit_bytes{namespace="webscada",pod=~"backend.*"} > 0.9
+          for: 5m
+          labels:
+            severity: warning
+            component: backend
+          annotations:
+            summary: 'High memory usage detected'
+            description: 'Pod {{ $labels.pod }} has high memory usage (> 90%) for more than 5 minutes.'
+
+        # PostgreSQL connection issues
+        - alert: PostgreSQLDown
+          expr: up{job="postgresql-metrics"} == 0
+          for: 1m
+          labels:
+            severity: critical
+            component: database
+          annotations:
+            summary: 'PostgreSQL is down'
+            description: 'PostgreSQL database has been unreachable for more than 1 minute.'
+
+        # Redis connection issues
+        - alert: RedisDown
+          expr: up{job="redis-metrics"} == 0
+          for: 1m
+          labels:
+            severity: warning
+            component: cache
+          annotations:
+            summary: 'Redis is down'
+            description: 'Redis cache has been unreachable for more than 1 minute.'
+
+        # Pod restart alerts
+        - alert: PodRestartingTooOften
+          expr: rate(kube_pod_container_status_restarts_total{namespace="webscada"}[15m]) > 0.1
+          for: 5m
+          labels:
+            severity: warning
+          annotations:
+            summary: 'Pod restarting frequently'
+            description: 'Pod {{ $labels.pod }} is restarting frequently (> 0.1 restarts/min).'
+
+        # WebSocket connection monitoring
+        - alert: HighWebSocketConnections
+          expr: websocket_connections{namespace="webscada"} > 1000
+          for: 5m
+          labels:
+            severity: info
+            component: backend
+          annotations:
+            summary: 'High WebSocket connection count'
+            description: 'More than 1000 WebSocket connections active for 5 minutes.'

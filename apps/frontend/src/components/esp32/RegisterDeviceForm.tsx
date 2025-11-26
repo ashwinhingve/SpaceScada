@@ -11,7 +11,7 @@ export function RegisterDeviceForm() {
   const [error, setError] = useState<string | null>(null);
   const [formData, setFormData] = useState<RegisterDeviceRequest>({
     name: '',
-    sensorType: ESP32SensorType.DHT22,
+    sensorType: ESP32SensorType.TEMPERATURE,
     mqttBroker: 'localhost',
     mqttPort: 1883,
     publishInterval: 5000,
@@ -97,12 +97,14 @@ export function RegisterDeviceForm() {
               onChange={handleChange}
               className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
             >
-              <option value={ESP32SensorType.DHT11}>DHT11</option>
-              <option value={ESP32SensorType.DHT22}>DHT22</option>
-              <option value={ESP32SensorType.BMP180}>BMP180</option>
-              <option value={ESP32SensorType.BMP280}>BMP280</option>
-              <option value={ESP32SensorType.BME280}>BME280</option>
-              <option value={ESP32SensorType.DS18B20}>DS18B20</option>
+              <option value={ESP32SensorType.TEMPERATURE}>Temperature</option>
+              <option value={ESP32SensorType.HUMIDITY}>Humidity</option>
+              <option value={ESP32SensorType.PRESSURE}>Pressure</option>
+              <option value={ESP32SensorType.LIGHT}>Light</option>
+              <option value={ESP32SensorType.MOTION}>Motion</option>
+              <option value={ESP32SensorType.GAS}>Gas</option>
+              <option value={ESP32SensorType.VOLTAGE}>Voltage</option>
+              <option value={ESP32SensorType.CURRENT}>Current</option>
               <option value={ESP32SensorType.CUSTOM}>Custom</option>
             </select>
           </div>

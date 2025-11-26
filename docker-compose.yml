@@ -37,6 +37,25 @@ services:
     networks:
       - webscada-network
 
+  # MQTT Broker
+  mosquitto:
+    image: eclipse-mosquitto:2.0
+    container_name: webscada-mosquitto
+    ports:
+      - '1883:1883'
+      - '9001:9001'
+    volumes:
+      - ./infrastructure/mosquitto/mosquitto-dev.conf:/mosquitto/config/mosquitto.conf
+      - mosquitto_data:/mosquitto/data
+      - mosquitto_logs:/mosquitto/log
+    networks:
+      - webscada-network
+    healthcheck:
+      test: ['CMD', 'mosquitto_sub', '-t', '$$SYS/#', '-C', '1', '-i', 'healthcheck', '-W', '3']
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
   # Backend API
   backend:
     build:
@@ -107,3 +126,5 @@ networks:
 volumes:
   postgres_data:
   redis_data:
+  mosquitto_data:
+  mosquitto_logs:

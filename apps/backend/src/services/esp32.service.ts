@@ -210,7 +210,10 @@ export class ESP32Service {
           payload = { action: 'reboot' };
           break;
         case ESP32Action.CUSTOM:
-          payload = { action: 'custom', ...command.customCommand };
+          payload = {
+            action: 'custom',
+            ...(command.customCommand ? JSON.parse(command.customCommand) : {})
+          };
           break;
       }
 
@@ -315,7 +318,7 @@ export class ESP32Service {
         status: data.status || 'online',
         uptime: data.uptime,
         freeHeap: data.freeHeap,
-        wifiRSSI: data.wifiRSSI,
+        wifiRssi: data.wifiRSSI,
         timestamp: new Date(),
       };
 
@@ -346,9 +349,10 @@ export class ESP32Service {
   private async handleStatusUpdate(deviceId: string, data: any): Promise<void> {
     try {
       const controlState: ESP32ControlState = {
+        deviceId,
+        outputs: data.outputStates || data.outputs || {},
         ledState: data.ledState || false,
-        relayStates: data.relayStates,
-        outputStates: data.outputStates,
+        mode: data.mode,
         timestamp: new Date(),
       };
 
@@ -561,23 +565,29 @@ export class ESP32Service {
   }
 
   private mapRowToDevice(row: any): ESP32Device {
+    const parsedConfig = typeof row.config === 'string' ? JSON.parse(row.config) : row.config;
     return {
       id: row.id,
+      device_id: row.device_id || row.id,
       name: row.name,
       type: row.type,
       status: row.status,
       protocol: row.protocol,
+      config: parsedConfig || {
+        mqttClientId: '',
+        mqttTopic: '',
+        publishInterval: 5000,
+        sensors: []
+      },
       connectionConfig: {
         host: 'localhost', // MQTT broker host
         port: 1883, // MQTT broker port
       },
       tags: [],
-      esp32Config: typeof row.config === 'string' ? JSON.parse(row.config) : row.config,
-      sensorData: row.sensor_data,
-      controlState: row.control_state,
+      esp32Config: parsedConfig,
       lastSeen: row.last_seen ? new Date(row.last_seen) : undefined,
-      createdAt: new Date(row.created_at),
-      updatedAt: new Date(row.updated_at),
+      created_at: new Date(row.created_at),
+      updated_at: new Date(row.updated_at),
     };
   }
 

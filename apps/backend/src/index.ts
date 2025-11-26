@@ -1,7 +1,8 @@
 import 'dotenv/config';
 
-import { createServer } from './server';
 import { createLogger } from '@webscada/utils';
+
+import { createServer } from './server';
 
 const logger = createLogger({ prefix: 'Backend' });
 

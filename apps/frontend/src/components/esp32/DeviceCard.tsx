@@ -51,26 +51,26 @@ export function DeviceCard({ device, onDelete }: DeviceCardProps) {
           </div>
         </div>
         <span className="px-2 py-1 text-xs font-medium rounded-full bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200">
-          {device.esp32Config.sensorType}
+          {device.esp32Config?.sensorType || 'Unknown'}
         </span>
       </div>
 
       {/* Sensor Data */}
-      {device.sensorData && (
+      {(device as any).sensorData && (
         <div className="grid grid-cols-2 gap-4 mb-4">
-          {device.sensorData.temperature !== undefined && (
+          {(device as any).sensorData.temperature !== undefined && (
             <div className="bg-gray-50 dark:bg-gray-700 rounded p-3">
               <p className="text-xs text-gray-500 dark:text-gray-400">Temperature</p>
               <p className="text-xl font-semibold text-gray-900 dark:text-white">
-                {device.sensorData.temperature.toFixed(1)}°C
+                {(device as any).sensorData.temperature.toFixed(1)}°C
               </p>
             </div>
           )}
-          {device.sensorData.humidity !== undefined && (
+          {(device as any).sensorData.humidity !== undefined && (
             <div className="bg-gray-50 dark:bg-gray-700 rounded p-3">
               <p className="text-xs text-gray-500 dark:text-gray-400">Humidity</p>
               <p className="text-xl font-semibold text-gray-900 dark:text-white">
-                {device.sensorData.humidity.toFixed(1)}%
+                {(device as any).sensorData.humidity.toFixed(1)}%
               </p>
             </div>
           )}
@@ -78,15 +78,15 @@ export function DeviceCard({ device, onDelete }: DeviceCardProps) {
       )}
 
       {/* LED Status */}
-      {device.controlState && (
+      {(device as any).controlState && (
         <div className="flex items-center gap-2 mb-4">
           <div
             className={`w-4 h-4 rounded-full ${
-              device.controlState.ledState ? 'bg-yellow-400' : 'bg-gray-300'
+              (device as any).controlState.ledState ? 'bg-yellow-400' : 'bg-gray-300'
             }`}
           />
           <span className="text-sm text-gray-600 dark:text-gray-300">
-            LED {device.controlState.ledState ? 'On' : 'Off'}
+            LED {(device as any).controlState.ledState ? 'On' : 'Off'}
           </span>
         </div>
       )}
