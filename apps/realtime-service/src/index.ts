@@ -1,5 +1,5 @@
-import { createServer } from './server';
 import { config } from './config';
+import { createServer } from './server';
 import { logInfo, logError } from './utils/logger';
 
 const start = async () => {

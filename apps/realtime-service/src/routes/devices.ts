@@ -1,7 +1,8 @@
 import { FastifyInstance } from 'fastify';
-import { DeviceSimulator } from '../simulation/devices';
-import { DeviceService } from '../services/device-service';
+
 import { createSuccessResponse, createErrorResponse } from '../middleware/error-handler';
+import { DeviceService } from '../services/device-service';
+import { DeviceSimulator } from '../simulation/devices';
 import { logInfo } from '../utils/logger';
 
 export const deviceRoutes = async (

@@ -3,9 +3,10 @@
  * Handles device event logging and audit trails for all device types
  */
 
-import { Pool } from 'pg';
-import { DatabaseService } from './database';
 import { createLogger } from '@webscada/utils';
+import { Pool } from 'pg';
+
+import { DatabaseService } from './database';
 
 const logger = createLogger({ prefix: 'LogsService' });
 
@@ -275,10 +276,7 @@ export class LogsService {
    */
   async cleanupOldLogs(retentionDays: number = 30): Promise<number> {
     try {
-      const result = await this.db.query(
-        'SELECT cleanup_old_logs($1)',
-        [retentionDays]
-      );
+      const result = await this.db.query('SELECT cleanup_old_logs($1)', [retentionDays]);
 
       const deletedCount = result.rows[0].cleanup_old_logs;
       logger.info('Old logs cleaned up', { deletedCount, retentionDays });
@@ -373,7 +371,10 @@ export class LogsService {
   /**
    * Get configuration history for a device
    */
-  async getConfigurationHistory(deviceId: string, limit: number = 50): Promise<DeviceConfiguration[]> {
+  async getConfigurationHistory(
+    deviceId: string,
+    limit: number = 50
+  ): Promise<DeviceConfiguration[]> {
     try {
       const result = await this.db.query(
         `SELECT

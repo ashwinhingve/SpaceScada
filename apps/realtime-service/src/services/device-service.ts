@@ -1,5 +1,5 @@
-import { DataPoint, DeviceTag } from '../types';
 import { config } from '../config';
+import { DataPoint, DeviceTag } from '../types';
 
 export class DeviceService {
   private dataHistory: Map<string, DataPoint[]> = new Map();

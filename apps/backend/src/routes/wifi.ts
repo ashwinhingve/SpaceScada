@@ -4,9 +4,10 @@
  */
 
 import { FastifyInstance, FastifyRequest, FastifyReply } from 'fastify';
-import { WiFiService, WiFiDeviceData, WiFiDeviceUpdateData } from '../services/wifi.service';
-import { TelemetryService } from '../services/telemetry.service';
+
 import { LogsService } from '../services/logs.service';
+import { TelemetryService } from '../services/telemetry.service';
+import { WiFiService, WiFiDeviceData, WiFiDeviceUpdateData } from '../services/wifi.service';
 
 interface CreateWiFiDeviceBody {
   name: string;
@@ -117,73 +118,79 @@ export async function wifiRoutes(fastify: FastifyInstance) {
    * Create a new Wi-Fi device
    * POST /api/wifi
    */
-  fastify.post('/', async (request: FastifyRequest<{ Body: CreateWiFiDeviceBody }>, reply: FastifyReply) => {
-    try {
-      const deviceData: WiFiDeviceData = request.body;
+  fastify.post(
+    '/',
+    async (request: FastifyRequest<{ Body: CreateWiFiDeviceBody }>, reply: FastifyReply) => {
+      try {
+        const deviceData: WiFiDeviceData = request.body;
 
-      // Validate required fields
-      if (!deviceData.name || !deviceData.mac_address || !deviceData.application_id) {
-        return reply.code(400).send({
-          success: false,
-          error: 'Missing required fields',
-          message: 'name, mac_address, and application_id are required',
+        // Validate required fields
+        if (!deviceData.name || !deviceData.mac_address || !deviceData.application_id) {
+          return reply.code(400).send({
+            success: false,
+            error: 'Missing required fields',
+            message: 'name, mac_address, and application_id are required',
+          });
+        }
+
+        const device = await wifiService.createDevice(deviceData);
+
+        return reply.code(201).send({
+          success: true,
+          data: device,
+          message: 'Wi-Fi device created successfully',
         });
-      }
-
-      const device = await wifiService.createDevice(deviceData);
-
-      return reply.code(201).send({
-        success: true,
-        data: device,
-        message: 'Wi-Fi device created successfully',
-      });
-    } catch (error: any) {
-      if (error.message.includes('already exists')) {
-        return reply.code(409).send({
+      } catch (error: any) {
+        if (error.message.includes('already exists')) {
+          return reply.code(409).send({
+            success: false,
+            error: 'Conflict',
+            message: error.message,
+          });
+        }
+        return reply.code(500).send({
           success: false,
-          error: 'Conflict',
+          error: 'Failed to create Wi-Fi device',
           message: error.message,
         });
       }
-      return reply.code(500).send({
-        success: false,
-        error: 'Failed to create Wi-Fi device',
-        message: error.message,
-      });
     }
-  });
+  );
 
   /**
    * Update a Wi-Fi device
    * PUT /api/wifi/:id
    */
-  fastify.put('/:id', async (request: FastifyRequest<{ Body: UpdateWiFiDeviceBody }>, reply: FastifyReply) => {
-    try {
-      const { id } = request.params as { id: string };
-      const updateData: WiFiDeviceUpdateData = request.body;
+  fastify.put(
+    '/:id',
+    async (request: FastifyRequest<{ Body: UpdateWiFiDeviceBody }>, reply: FastifyReply) => {
+      try {
+        const { id } = request.params as { id: string };
+        const updateData: WiFiDeviceUpdateData = request.body;
 
-      const device = await wifiService.updateDevice(id, updateData);
+        const device = await wifiService.updateDevice(id, updateData);
 
-      return reply.code(200).send({
-        success: true,
-        data: device,
-        message: 'Wi-Fi device updated successfully',
-      });
-    } catch (error: any) {
-      if (error.message.includes('not found')) {
-        return reply.code(404).send({
+        return reply.code(200).send({
+          success: true,
+          data: device,
+          message: 'Wi-Fi device updated successfully',
+        });
+      } catch (error: any) {
+        if (error.message.includes('not found')) {
+          return reply.code(404).send({
+            success: false,
+            error: 'Wi-Fi device not found',
+            message: error.message,
+          });
+        }
+        return reply.code(500).send({
           success: false,
-          error: 'Wi-Fi device not found',
+          error: 'Failed to update Wi-Fi device',
           message: error.message,
         });
       }
-      return reply.code(500).send({
-        success: false,
-        error: 'Failed to update Wi-Fi device',
-        message: error.message,
-      });
     }
-  });
+  );
 
   /**
    * Delete a Wi-Fi device
@@ -342,12 +349,17 @@ export async function wifiRoutes(fastify: FastifyInstance) {
         name: device.name,
         status: device.status,
         signal_strength: device.signal_strength,
-        signal_quality: device.signal_strength >= 80 ? 'excellent' :
-                        device.signal_strength >= 50 ? 'good' :
-                        device.signal_strength >= 30 ? 'fair' : 'poor',
-        uptime_hours: device.last_seen ?
-          Math.floor((Date.now() - new Date(device.last_seen).getTime()) / (1000 * 60 * 60)) :
-          null,
+        signal_quality:
+          device.signal_strength >= 80
+            ? 'excellent'
+            : device.signal_strength >= 50
+              ? 'good'
+              : device.signal_strength >= 30
+                ? 'fair'
+                : 'poor',
+        uptime_hours: device.last_seen
+          ? Math.floor((Date.now() - new Date(device.last_seen).getTime()) / (1000 * 60 * 60))
+          : null,
         last_seen: device.last_seen,
       };
 
@@ -375,13 +387,7 @@ export async function wifiRoutes(fastify: FastifyInstance) {
   fastify.get('/:id/telemetry', async (request: FastifyRequest, reply: FastifyReply) => {
     try {
       const { id } = request.params as { id: string };
-      const {
-        metric_name,
-        start_time,
-        end_time,
-        limit,
-        aggregation,
-      } = request.query as any;
+      const { metric_name, start_time, end_time, limit, aggregation } = request.query as any;
 
       const query: any = {
         device_id: id,
@@ -512,13 +518,7 @@ export async function wifiRoutes(fastify: FastifyInstance) {
   fastify.get('/:id/logs', async (request: FastifyRequest, reply: FastifyReply) => {
     try {
       const { id } = request.params as { id: string };
-      const {
-        log_level,
-        event_type,
-        start_time,
-        end_time,
-        limit,
-      } = request.query as any;
+      const { log_level, event_type, start_time, end_time, limit } = request.query as any;
 
       const query: any = {
         device_id: id,
@@ -727,24 +727,27 @@ export async function wifiRoutes(fastify: FastifyInstance) {
    * Get configuration history
    * GET /api/wifi/:id/configuration/history
    */
-  fastify.get('/:id/configuration/history', async (request: FastifyRequest, reply: FastifyReply) => {
-    try {
-      const { id } = request.params as { id: string };
-      const { limit } = request.query as any;
+  fastify.get(
+    '/:id/configuration/history',
+    async (request: FastifyRequest, reply: FastifyReply) => {
+      try {
+        const { id } = request.params as { id: string };
+        const { limit } = request.query as any;
 
-      const history = await logsService.getConfigurationHistory(id, limit ? parseInt(limit) : 50);
+        const history = await logsService.getConfigurationHistory(id, limit ? parseInt(limit) : 50);
 
-      return reply.code(200).send({
-        success: true,
-        data: history,
-        total: history.length,
-      });
-    } catch (error: any) {
-      return reply.code(500).send({
-        success: false,
-        error: 'Failed to get configuration history',
-        message: error.message,
-      });
+        return reply.code(200).send({
+          success: true,
+          data: history,
+          total: history.length,
+        });
+      } catch (error: any) {
+        return reply.code(500).send({
+          success: false,
+          error: 'Failed to get configuration history',
+          message: error.message,
+        });
+      }
     }
-  });
+  );
 }

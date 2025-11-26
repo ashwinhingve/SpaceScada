@@ -23,7 +23,7 @@ export default function ConsoleDashboard() {
 
   // Convert widgets to react-grid-layout format
   const layouts = useMemo(() => {
-    const gridLayouts: Layout[] = widgets.map(widget => ({
+    const gridLayouts: Layout[] = widgets.map((widget) => ({
       i: widget.id,
       x: widget.layout.x,
       y: widget.layout.y,
@@ -46,16 +46,17 @@ export default function ConsoleDashboard() {
   const handleLayoutChange = (newLayout: Layout[]) => {
     // Only update if layouts actually changed
     const updates = newLayout
-      .filter(layout => {
-        const widget = widgets.find(w => w.id === layout.i);
-        return widget && (
-          widget.layout.x !== layout.x ||
-          widget.layout.y !== layout.y ||
-          widget.layout.w !== layout.w ||
-          widget.layout.h !== layout.h
+      .filter((layout) => {
+        const widget = widgets.find((w) => w.id === layout.i);
+        return (
+          widget &&
+          (widget.layout.x !== layout.x ||
+            widget.layout.y !== layout.y ||
+            widget.layout.w !== layout.w ||
+            widget.layout.h !== layout.h)
         );
       })
-      .map(layout => ({
+      .map((layout) => ({
         widgetId: layout.i,
         layout: {
           x: layout.x,
@@ -77,36 +78,36 @@ export default function ConsoleDashboard() {
   };
 
   return (
-    <div className='max-w-full'>
+    <div className="max-w-full">
       {/* Breadcrumb */}
-      <div className='mb-6'>
-        <div className='flex items-center gap-2 text-sm'>
-          <Link href='/console' className='text-gray-400 hover:text-white'>
+      <div className="mb-6">
+        <div className="flex items-center gap-2 text-sm">
+          <Link href="/console" className="text-gray-400 hover:text-white">
             Home
           </Link>
-          <span className='text-gray-600'>&gt;</span>
-          <span className='text-white'>Dashboard</span>
+          <span className="text-gray-600">&gt;</span>
+          <span className="text-white">Dashboard</span>
         </div>
       </div>
 
       {/* Compact Map at Top */}
-      <div className='mb-6'>
-        <div className='flex items-center justify-between mb-3'>
-          <div className='flex items-center gap-2'>
-            <MapPin className='h-5 w-5 text-blue-400' />
-            <h2 className='text-xl font-bold text-white'>Network Map</h2>
+      <div className="mb-6">
+        <div className="flex items-center justify-between mb-3">
+          <div className="flex items-center gap-2">
+            <MapPin className="h-5 w-5 text-blue-400" />
+            <h2 className="text-xl font-bold text-white">Network Map</h2>
           </div>
           <Link
-            href='/console/gis'
-            className='text-blue-400 hover:text-blue-300 text-sm flex items-center gap-1'
+            href="/console/gis"
+            className="text-blue-400 hover:text-blue-300 text-sm flex items-center gap-1"
           >
             Full Screen View
-            <ArrowRight className='h-4 w-4' />
+            <ArrowRight className="h-4 w-4" />
           </Link>
         </div>
         <GISDashboard
           apiKey={process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY || ''}
-          className='h-[400px]'
+          className="h-[400px]"
         />
       </div>
 
@@ -115,42 +116,41 @@ export default function ConsoleDashboard() {
 
       {/* Widget Grid */}
       {loading ? (
-        <div className='flex items-center justify-center h-64'>
-          <div className='text-gray-400'>Loading widgets...</div>
+        <div className="flex items-center justify-center h-64">
+          <div className="text-gray-400">Loading widgets...</div>
         </div>
       ) : widgets.length === 0 ? (
-        <div className='flex flex-col items-center justify-center h-64 bg-[#1E293B] border border-gray-800 rounded-lg'>
-          <div className='text-gray-400 text-center'>
-            <p className='text-lg mb-2'>No widgets added yet</p>
-            <p className='text-sm'>Use the toolbar above to add widgets to your dashboard</p>
+        <div className="flex flex-col items-center justify-center h-64 bg-[#1E293B] border border-gray-800 rounded-lg">
+          <div className="text-gray-400 text-center">
+            <p className="text-lg mb-2">No widgets added yet</p>
+            <p className="text-sm">Use the toolbar above to add widgets to your dashboard</p>
           </div>
         </div>
       ) : (
         <ResponsiveGridLayout
-          className='layout'
+          className="layout"
           layouts={layouts}
           breakpoints={{ lg: 1200, md: 996, sm: 768, xs: 480 }}
           cols={{ lg: 12, md: 10, sm: 6, xs: 4 }}
           rowHeight={60}
           isDraggable={true}
           isResizable={true}
-          compactType='vertical'
+          compactType="vertical"
           preventCollision={false}
           onLayoutChange={handleLayoutChange}
-          draggableHandle='.cursor-move'
+          draggableHandle=".cursor-move"
         >
-          {widgets.map(widget => (
-            <div key={widget.id} className='widget-item'>
-              <WidgetRenderer
-                widget={widget}
-                onRemove={handleRemoveWidget}
-              />
+          {widgets.map((widget) => (
+            <div key={widget.id} className="widget-item">
+              <WidgetRenderer widget={widget} onRemove={handleRemoveWidget} />
             </div>
           ))}
         </ResponsiveGridLayout>
       )}
 
-      <style jsx global>{`
+      <style
+        dangerouslySetInnerHTML={{
+          __html: `
         .react-grid-item {
           transition: all 200ms ease;
           transition-property: left, top, width, height;
@@ -188,7 +188,9 @@ export default function ConsoleDashboard() {
         .widget-item {
           overflow: hidden;
         }
-      `}</style>
+      `,
+        }}
+      />
     </div>
   );
 }

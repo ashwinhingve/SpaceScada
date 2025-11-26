@@ -3,9 +3,10 @@
  * Handles Wi-Fi device management operations
  */
 
-import { Pool } from 'pg';
-import { DatabaseService } from './database';
 import { createLogger } from '@webscada/utils';
+import { Pool } from 'pg';
+
+import { DatabaseService } from './database';
 
 const logger = createLogger({ prefix: 'WiFiService' });
 
@@ -227,10 +228,14 @@ export class WiFiService {
         ]
       );
 
-      logger.info('Wi-Fi device created', { id: result.rows[0].id, macAddress: deviceData.mac_address });
+      logger.info('Wi-Fi device created', {
+        id: result.rows[0].id,
+        macAddress: deviceData.mac_address,
+      });
       return result.rows[0];
     } catch (error: any) {
-      if (error.code === '23505') { // Unique violation
+      if (error.code === '23505') {
+        // Unique violation
         throw new Error('Wi-Fi device with this MAC address already exists');
       }
       logger.error('Failed to create Wi-Fi device', { error });
@@ -335,10 +340,9 @@ export class WiFiService {
    */
   async deleteDevice(id: string): Promise<void> {
     try {
-      const result = await this.db.query(
-        'DELETE FROM wifi_devices WHERE id = $1 RETURNING id',
-        [id]
-      );
+      const result = await this.db.query('DELETE FROM wifi_devices WHERE id = $1 RETURNING id', [
+        id,
+      ]);
 
       if (result.rows.length === 0) {
         throw new Error('Wi-Fi device not found');
@@ -356,10 +360,10 @@ export class WiFiService {
    */
   async updateStatus(id: string, status: 'online' | 'offline' | 'error'): Promise<void> {
     try {
-      await this.db.query(
-        'UPDATE wifi_devices SET status = $1, last_seen = NOW() WHERE id = $2',
-        [status, id]
-      );
+      await this.db.query('UPDATE wifi_devices SET status = $1, last_seen = NOW() WHERE id = $2', [
+        status,
+        id,
+      ]);
       logger.info('Wi-Fi device status updated', { id, status });
     } catch (error) {
       logger.error('Failed to update Wi-Fi device status', { id, error });

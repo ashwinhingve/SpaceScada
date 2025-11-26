@@ -1,5 +1,5 @@
-import Joi from 'joi';
 import dotenv from 'dotenv';
+import Joi from 'joi';
 
 dotenv.config();
 
@@ -9,9 +9,7 @@ const configSchema = Joi.object({
   host: Joi.string().default('0.0.0.0'),
   nodeEnv: Joi.string().valid('development', 'production', 'test').default('development'),
   corsOrigin: Joi.string().default('http://localhost:3000'),
-  logLevel: Joi.string()
-    .valid('fatal', 'error', 'warn', 'info', 'debug', 'trace')
-    .default('info'),
+  logLevel: Joi.string().valid('fatal', 'error', 'warn', 'info', 'debug', 'trace').default('info'),
   updateInterval: Joi.number().min(100).max(10000).default(1000),
   dataHistorySize: Joi.number().min(10).max(1000).default(100),
   heartbeatInterval: Joi.number().min(10000).default(30000),

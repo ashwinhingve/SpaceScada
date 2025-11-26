@@ -20,12 +20,11 @@ interface GISDashboardProps {
 export function GISDashboard({ apiKey, className = '' }: GISDashboardProps) {
   const [layers, setLayers] = useState<LayerConfig[]>(DEFAULT_LAYERS);
   const [selectedFeature, setSelectedFeature] = useState<Record<string, any> | null>(null);
+  const [showLegend, setShowLegend] = useState(false);
 
   const handleLayerToggle = (layerId: LayerType) => {
     setLayers((prev) =>
-      prev.map((layer) =>
-        layer.id === layerId ? { ...layer, enabled: !layer.enabled } : layer
-      )
+      prev.map((layer) => (layer.id === layerId ? { ...layer, enabled: !layer.enabled } : layer))
     );
   };
 
@@ -48,9 +47,7 @@ export function GISDashboard({ apiKey, className = '' }: GISDashboardProps) {
             </div>
             <div>
               <h2 className="text-white font-bold text-lg">GIS Map View</h2>
-              <p className="text-gray-400 text-sm">
-                Water Distribution Network Monitoring
-              </p>
+              <p className="text-gray-400 text-sm">Water Distribution Network Monitoring</p>
             </div>
           </div>
 
@@ -108,9 +105,7 @@ export function GISDashboard({ apiKey, className = '' }: GISDashboardProps) {
               .filter(([key]) => key !== 'name')
               .map(([key, value]) => (
                 <div key={key} className="flex justify-between text-sm">
-                  <span className="text-gray-400 capitalize">
-                    {key.replace(/_/g, ' ')}:
-                  </span>
+                  <span className="text-gray-400 capitalize">{key.replace(/_/g, ' ')}:</span>
                   <span className="text-white font-medium">{String(value)}</span>
                 </div>
               ))}
@@ -124,44 +119,63 @@ export function GISDashboard({ apiKey, className = '' }: GISDashboardProps) {
                   className={`w-2 h-2 rounded-full ${
                     selectedFeature.status === 'active' || selectedFeature.status === 'open'
                       ? 'bg-green-500'
-                      : selectedFeature.status === 'inactive' ||
-                        selectedFeature.status === 'closed'
-                      ? 'bg-red-500'
-                      : 'bg-yellow-500'
+                      : selectedFeature.status === 'inactive' || selectedFeature.status === 'closed'
+                        ? 'bg-red-500'
+                        : 'bg-yellow-500'
                   }`}
                 />
-                <span className="text-sm text-gray-300 capitalize">
-                  {selectedFeature.status}
-                </span>
+                <span className="text-sm text-gray-300 capitalize">{selectedFeature.status}</span>
               </div>
             </div>
           )}
         </div>
       )}
 
-      {/* Legend */}
-      <div className="absolute bottom-4 right-4 z-10 bg-[#1E293B] border border-gray-700 rounded-lg shadow-xl p-3 max-w-xs">
-        <h4 className="text-white font-semibold text-sm mb-2">Legend</h4>
-        <div className="space-y-1.5">
-          {layers
-            .filter((layer) => layer.enabled)
-            .slice(0, 5)
-            .map((layer) => (
-              <div key={layer.id} className="flex items-center gap-2 text-xs">
-                <div
-                  className="w-3 h-3 rounded-sm border border-gray-600"
-                  style={{ backgroundColor: layer.color }}
-                />
-                <span className="text-gray-300">{layer.name}</span>
+      {/* Legend - Hidden by default, toggle with button */}
+      {showLegend && (
+        <div className="absolute bottom-4 right-4 z-10 bg-[#1E293B] border border-gray-700 rounded-lg shadow-xl p-3 max-w-xs">
+          <div className="flex items-center justify-between mb-2">
+            <h4 className="text-white font-semibold text-sm">Legend</h4>
+            <button
+              onClick={() => setShowLegend(false)}
+              className="text-gray-400 hover:text-white transition-colors"
+              title="Hide Legend"
+            >
+              ✕
+            </button>
+          </div>
+          <div className="space-y-1.5">
+            {layers
+              .filter((layer) => layer.enabled)
+              .slice(0, 5)
+              .map((layer) => (
+                <div key={layer.id} className="flex items-center gap-2 text-xs">
+                  <div
+                    className="w-3 h-3 rounded-sm border border-gray-600"
+                    style={{ backgroundColor: layer.color }}
+                  />
+                  <span className="text-gray-300">{layer.name}</span>
+                </div>
+              ))}
+            {layers.filter((layer) => layer.enabled).length > 5 && (
+              <div className="text-xs text-gray-500 italic">
+                +{layers.filter((layer) => layer.enabled).length - 5} more layers
               </div>
-            ))}
-          {layers.filter((layer) => layer.enabled).length > 5 && (
-            <div className="text-xs text-gray-500 italic">
-              +{layers.filter((layer) => layer.enabled).length - 5} more layers
-            </div>
-          )}
+            )}
+          </div>
         </div>
-      </div>
+      )}
+
+      {/* Legend Toggle Button */}
+      {!showLegend && (
+        <button
+          onClick={() => setShowLegend(true)}
+          className="absolute bottom-4 right-4 z-10 bg-[#1E293B] border border-gray-700 hover:bg-gray-700 text-white rounded-lg shadow-xl p-2 transition-colors"
+          title="Show Legend"
+        >
+          <span className="text-sm font-medium">Show Legend</span>
+        </button>
+      )}
     </div>
   );
 }

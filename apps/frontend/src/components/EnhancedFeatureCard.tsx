@@ -1,8 +1,8 @@
 'use client';
 
-import { ReactNode } from 'react';
+import { ReactNode, useRef } from 'react';
 import { motion, useInView } from 'framer-motion';
-import { useRef } from 'react';
+
 import { ArrowRight } from 'lucide-react';
 
 interface EnhancedFeatureCardProps {
@@ -29,11 +29,7 @@ export function EnhancedFeatureCard({
     <motion.div
       ref={ref}
       initial={{ opacity: 0, y: 50, scale: 0.9 }}
-      animate={
-        isInView
-          ? { opacity: 1, y: 0, scale: 1 }
-          : { opacity: 0, y: 50, scale: 0.9 }
-      }
+      animate={isInView ? { opacity: 1, y: 0, scale: 1 } : { opacity: 0, y: 50, scale: 0.9 }}
       transition={{
         duration: 0.6,
         delay,
@@ -109,9 +105,7 @@ export function EnhancedFeatureCard({
               {title}
             </h3>
 
-            <p className="text-muted-foreground dark:text-gray-400 mb-4 flex-1">
-              {description}
-            </p>
+            <p className="text-muted-foreground dark:text-gray-400 mb-4 flex-1">{description}</p>
 
             {/* Learn more link */}
             {href && (

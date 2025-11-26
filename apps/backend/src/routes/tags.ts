@@ -1,5 +1,5 @@
-import { FastifyInstance, FastifyRequest, FastifyReply } from 'fastify';
 import { Tag, ApiResponse } from '@webscada/shared-types';
+import { FastifyInstance, FastifyRequest, FastifyReply } from 'fastify';
 
 export const tagRoutes = async (server: FastifyInstance) => {
   // GET /api/tags
@@ -9,7 +9,7 @@ export const tagRoutes = async (server: FastifyInstance) => {
       request: FastifyRequest<{ Querystring: { deviceId?: string } }>,
       reply: FastifyReply
     ) => {
-      const { deviceId } = request.query;
+      const { deviceId: _deviceId } = request.query;
 
       // TODO: Fetch tags from database
       const response: ApiResponse<Tag[]> = {

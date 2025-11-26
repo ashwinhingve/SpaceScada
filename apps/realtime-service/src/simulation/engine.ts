@@ -1,8 +1,9 @@
 import { Server as SocketIOServer } from 'socket.io';
+
 import { DeviceSimulator } from './devices';
 import { config } from '../config';
-import { logInfo, logError, logDebug } from '../utils/logger';
 import { WebSocketEvent, DataUpdatePayload } from '../types';
+import { logInfo, logError, logDebug } from '../utils/logger';
 
 export class SimulationEngine {
   private simulator: DeviceSimulator;

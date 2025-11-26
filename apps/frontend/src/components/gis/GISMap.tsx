@@ -1,13 +1,8 @@
 'use client';
 
-/**
- * GIS Map Component with Google Maps/Earth Integration
- * Main component for displaying KML/GeoJSON layers on Google Maps
- */
-
 import React, { useEffect, useRef, useState, useCallback } from 'react';
 import { Loader } from '@googlemaps/js-api-loader';
-import { LayerConfig, LayerType, GeoJSONFeatureCollection } from '@/lib/gis/types';
+import { LayerConfig, LayerType } from '@/lib/gis/types';
 import { loadGeoJSON, getFeatureStyle, createTextLabel } from '@/lib/gis/utils';
 import { DEFAULT_MAP_CONFIG } from '@/lib/gis/layerConfig';
 
@@ -32,10 +27,17 @@ export function GISMap({ apiKey, layers, onMarkerClick, className = '' }: GISMap
   const [textLabels, setTextLabels] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [isMapReadyForLayers, setIsMapReadyForLayers] = useState(false);
 
   // Initialize Google Maps
   useEffect(() => {
     if (!mapRef.current || map) return;
+
+    if (!apiKey) {
+      setError('Google Maps API key is missing');
+      setIsLoading(false);
+      return;
+    }
 
     const loader = new Loader({
       apiKey,
@@ -52,6 +54,7 @@ export function GISMap({ apiKey, layers, onMarkerClick, className = '' }: GISMap
           setIsLoading(false);
           return;
         }
+
         const mapInstance = new gmaps.Map(mapRef.current!, {
           ...DEFAULT_MAP_CONFIG,
           mapTypeControl: true,
@@ -70,23 +73,42 @@ export function GISMap({ apiKey, layers, onMarkerClick, className = '' }: GISMap
           zoomControl: true,
           scaleControl: true,
           rotateControl: true,
-          tilt: 45, // Enable 3D view for Earth-like experience
+          tilt: 45,
         });
 
+        // Mark map instance
         setMap(mapInstance);
-        setIsLoading(false);
+
+        // ✅ Wait until the map has finished its first render
+        gmaps.event.addListenerOnce(mapInstance, 'idle', () => {
+          setIsMapReadyForLayers(true);
+          setIsLoading(false);
+        });
       })
       .catch((err) => {
         console.error('Error loading Google Maps:', err);
         setError('Failed to load Google Maps');
         setIsLoading(false);
       });
-  }, [apiKey, map]);
 
-  // Load and render layers
+    // Optional cleanup
+    return () => {
+      setMap(null);
+      setIsMapReadyForLayers(false);
+      // Remove labels
+      textLabels.forEach((label) => label.setMap(null));
+      setTextLabels([]);
+      // Detach data layers
+      dataLayers.forEach((dl) => dl.setMap(null));
+      setDataLayers(new Map());
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [apiKey, mapRef]);
+
+  // Load and render one layer
   const loadLayer = useCallback(
     async (layerConfig: LayerConfig) => {
-      if (!map) return;
+      if (!map || !isMapReadyForLayers) return;
 
       try {
         const gmaps = (window as any).google?.maps || (globalThis as any).google?.maps;
@@ -95,18 +117,13 @@ export function GISMap({ apiKey, layers, onMarkerClick, className = '' }: GISMap
         const geoJsonData = await loadGeoJSON(layerConfig.dataUrl);
         if (!geoJsonData) return;
 
-        // Create a Data layer for this GeoJSON
         const dataLayer = new gmaps.Data({
           map: layerConfig.enabled ? map : undefined,
         });
 
-        // Add GeoJSON features
         dataLayer.addGeoJson(geoJsonData);
-
-        // Apply styling
         dataLayer.setStyle((feature: any) => getFeatureStyle(feature, layerConfig));
 
-        // Add click listeners
         dataLayer.addListener('click', (event: any) => {
           const properties: Record<string, any> = {};
           event.feature.forEachProperty((value: any, key: string) => {
@@ -117,7 +134,6 @@ export function GISMap({ apiKey, layers, onMarkerClick, className = '' }: GISMap
             onMarkerClick(properties);
           }
 
-          // Show info window
           const infoWindow = new gmaps.InfoWindow({
             content: `
               <div style="padding: 8px; min-width: 200px;">
@@ -140,15 +156,15 @@ export function GISMap({ apiKey, layers, onMarkerClick, className = '' }: GISMap
           infoWindow.open(map);
         });
 
-        // Handle text labels for node numbers
-        if (layerConfig.id === LayerType.NODE_NUMBERS) {
+        // Node number labels
+        if (layerConfig.id === LayerType.NODE_NUMBERS && Array.isArray(geoJsonData.features)) {
           const labels: any[] = [];
-          geoJsonData.features.forEach((feature) => {
-            if (feature.geometry.type === 'Point') {
+          geoJsonData.features.forEach((feature: any) => {
+            if (feature.geometry?.type === 'Point') {
               const [lng, lat] = feature.geometry.coordinates;
               const label = createTextLabel(
                 { lat, lng },
-                feature.properties.label || feature.properties.name || '',
+                feature.properties?.label || feature.properties?.name || '',
                 layerConfig.color
               );
               if (layerConfig.enabled) {
@@ -157,31 +173,36 @@ export function GISMap({ apiKey, layers, onMarkerClick, className = '' }: GISMap
               labels.push(label);
             }
           });
+
           setTextLabels((prev) => [...prev, ...labels]);
         }
 
-        setDataLayers((prev) => new Map(prev).set(layerConfig.id, dataLayer));
+        setDataLayers((prev) => {
+          const next = new Map(prev);
+          next.set(layerConfig.id, dataLayer);
+          return next;
+        });
       } catch (err) {
         console.error(`Error loading layer ${layerConfig.id}:`, err);
       }
     },
-    [map, onMarkerClick]
+    [map, isMapReadyForLayers, onMarkerClick]
   );
 
-  // Load all enabled layers
+  // Load all layers only after map is ready
   useEffect(() => {
-    if (!map) return;
+    if (!map || !isMapReadyForLayers) return;
 
     layers.forEach((layer) => {
       if (!dataLayers.has(layer.id)) {
         loadLayer(layer);
       }
     });
-  }, [map, layers, dataLayers, loadLayer]);
+  }, [map, isMapReadyForLayers, layers, dataLayers, loadLayer]);
 
-  // Toggle layer visibility
+  // Toggle layer visibility (including labels)
   useEffect(() => {
-    if (!map) return;
+    if (!map || !isMapReadyForLayers) return;
 
     layers.forEach((layer) => {
       const dataLayer = dataLayers.get(layer.id);
@@ -189,14 +210,13 @@ export function GISMap({ apiKey, layers, onMarkerClick, className = '' }: GISMap
         dataLayer.setMap(layer.enabled ? map : null);
       }
 
-      // Toggle text labels
       if (layer.id === LayerType.NODE_NUMBERS) {
         textLabels.forEach((label) => {
           label.setMap(layer.enabled ? map : null);
         });
       }
     });
-  }, [map, layers, dataLayers, textLabels]);
+  }, [map, isMapReadyForLayers, layers, dataLayers, textLabels]);
 
   if (isLoading) {
     return (

@@ -1,6 +1,7 @@
 import { FastifyError, FastifyReply, FastifyRequest } from 'fastify';
-import { logError } from '../utils/logger';
+
 import { ApiResponse } from '../types';
+import { logError } from '../utils/logger';
 
 export const errorHandler = (
   error: FastifyError,

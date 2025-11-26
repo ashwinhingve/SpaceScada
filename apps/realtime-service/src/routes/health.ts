@@ -1,6 +1,7 @@
 import { FastifyInstance } from 'fastify';
-import { HealthResponse } from '../types';
+
 import { createSuccessResponse } from '../middleware/error-handler';
+import { HealthResponse } from '../types';
 
 export const healthRoutes = async (fastify: FastifyInstance, getConnectionCount: () => number) => {
   fastify.get(

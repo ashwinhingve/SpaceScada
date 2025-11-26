@@ -1,6 +1,7 @@
+import crypto from 'crypto';
+
 import { FastifyInstance, FastifyRequest, FastifyReply } from 'fastify';
 import { z } from 'zod';
-import crypto from 'crypto';
 
 const createOAuthClientSchema = z.object({
   name: z.string().min(1).max(255),
@@ -87,7 +88,8 @@ export default async function oauthRoutes(fastify: FastifyInstance) {
       reply.status(201).send({
         client: result.rows[0],
         clientSecret: clientSecret, // Return secret only once
-        message: 'OAuth client created successfully. Save the client secret as it will not be shown again.',
+        message:
+          'OAuth client created successfully. Save the client secret as it will not be shown again.',
       });
     } catch (error: unknown) {
       if (error instanceof z.ZodError) {
@@ -213,31 +215,34 @@ export default async function oauthRoutes(fastify: FastifyInstance) {
   });
 
   // Revoke authorization
-  fastify.delete('/api/oauth/authorizations/:id', async (request: FastifyRequest, reply: FastifyReply) => {
-    try {
-      const userId = '00000000-0000-0000-0000-000000000001';
-      const { id } = request.params as any;
+  fastify.delete(
+    '/api/oauth/authorizations/:id',
+    async (request: FastifyRequest, reply: FastifyReply) => {
+      try {
+        const userId = '00000000-0000-0000-0000-000000000001';
+        const { id } = request.params as any;
 
-      const result = await pg.query(
-        'DELETE FROM oauth_authorizations WHERE id = $1 AND user_id = $2 RETURNING id',
-        [id, userId]
-      );
+        const result = await pg.query(
+          'DELETE FROM oauth_authorizations WHERE id = $1 AND user_id = $2 RETURNING id',
+          [id, userId]
+        );
 
-      if (result.rows.length === 0) {
-        return reply.status(404).send({ error: 'Authorization not found' });
-      }
+        if (result.rows.length === 0) {
+          return reply.status(404).send({ error: 'Authorization not found' });
+        }
 
-      // Log activity
-      await pg.query(
-        `INSERT INTO activity_logs (user_id, action, resource_type, resource_id, description)
+        // Log activity
+        await pg.query(
+          `INSERT INTO activity_logs (user_id, action, resource_type, resource_id, description)
          VALUES ($1, 'oauth_authorization_revoked', 'oauth_authorization', $2, 'Authorization revoked')`,
-        [userId, id]
-      );
+          [userId, id]
+        );
 
-      reply.send({ message: 'Authorization revoked successfully' });
-    } catch (error) {
-      fastify.log.error(error);
-      reply.status(500).send({ error: 'Failed to revoke authorization' });
+        reply.send({ message: 'Authorization revoked successfully' });
+      } catch (error) {
+        fastify.log.error(error);
+        reply.status(500).send({ error: 'Failed to revoke authorization' });
+      }
     }
-  });
+  );
 }

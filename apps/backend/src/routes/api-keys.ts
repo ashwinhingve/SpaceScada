@@ -1,6 +1,7 @@
+import crypto from 'crypto';
+
 import { FastifyInstance, FastifyRequest, FastifyReply } from 'fastify';
 import { z } from 'zod';
-import crypto from 'crypto';
 
 const createApiKeySchema = z.object({
   name: z.string().min(1).max(255),

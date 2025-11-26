@@ -1,5 +1,5 @@
-import { FastifyInstance, FastifyRequest, FastifyReply } from 'fastify';
 import { Alarm, ApiResponse } from '@webscada/shared-types';
+import { FastifyInstance, FastifyRequest, FastifyReply } from 'fastify';
 
 export const alarmRoutes = async (server: FastifyInstance) => {
   // GET /api/alarms
@@ -9,7 +9,7 @@ export const alarmRoutes = async (server: FastifyInstance) => {
       request: FastifyRequest<{ Querystring: { acknowledged?: string } }>,
       reply: FastifyReply
     ) => {
-      const { acknowledged } = request.query;
+      const { acknowledged: _acknowledged } = request.query;
 
       // TODO: Fetch alarms from database
       const response: ApiResponse<Alarm[]> = {

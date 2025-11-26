@@ -359,11 +359,7 @@ export default function HomePage() {
         <div className="container mx-auto px-6">
           <div className="grid grid-cols-2 md:grid-cols-4 gap-6 max-w-5xl mx-auto">
             {stats.map((stat, index) => (
-              <AnimatedCounter
-                key={index}
-                value={stat.value}
-                label={stat.label}
-              />
+              <AnimatedCounter key={index} value={stat.value} label={stat.label} />
             ))}
           </div>
         </div>
@@ -527,7 +523,7 @@ export default function HomePage() {
 
                   <div className="relative">
                     <div className="absolute -top-4 -left-2 text-5xl text-blue-500/20 font-serif">
-                      "
+                      &ldquo;
                     </div>
                     <p className="text-muted-foreground dark:text-gray-300 relative z-10">
                       {testimonial.quote}

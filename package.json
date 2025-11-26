@@ -34,6 +34,7 @@
     "husky": "^8.0.3",
     "lint-staged": "^16.2.6",
     "prettier": "^3.1.1",
+    "tsx": "^4.7.0",
     "turbo": "^2.6.1",
     "typescript": "^5.3.3"
   },
@@ -41,5 +42,8 @@
   "workspaces": [
     "apps/*",
     "packages/*"
-  ]
+  ],
+  "dependencies": {
+    "modbus-serial": "^8.0.23"
+  }
 }

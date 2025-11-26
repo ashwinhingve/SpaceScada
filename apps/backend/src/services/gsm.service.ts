@@ -1,5 +1,8 @@
+import { GSMAdapter } from '@webscada/protocols';
 import {
   GSMDevice,
+  GSMDeviceConfig,
+  ConnectionConfig,
   GSMNetworkStatus,
   GPSLocation,
   SMSMessage,
@@ -10,9 +13,9 @@ import {
   SMSDirection,
   SMSStatus,
 } from '@webscada/shared-types';
-import { GSMAdapter } from '@webscada/protocols';
-import { DatabaseService } from './database';
 import { createLogger } from '@webscada/utils';
+
+import { DatabaseService } from './database';
 
 const logger = createLogger({ prefix: 'GSMService' });
 
@@ -301,38 +304,112 @@ export class GSMService {
   // ===== Database Methods (Stubs - to be implemented) =====
 
   private async saveDeviceToDatabase(device: GSMDevice): Promise<void> {
-    const query = `
-      INSERT INTO devices (id, name, type, status, protocol, connection_config, created_at, updated_at)
-      VALUES ($1, $2, $3, $4, $5, $6, NOW(), NOW())
+    // First, insert or update the base devices table
+    const devicesQuery = `
+      INSERT INTO devices (id, device_id, name, description, device_type, status, created_at, updated_at, last_seen)
+      VALUES ($1, $2, $3, $4, 'GSM_ESP32', $5, NOW(), NOW(), NOW())
       ON CONFLICT (id) DO UPDATE SET
-        name = $2,
-        type = $3,
-        status = $4,
-        protocol = $5,
-        connection_config = $6,
+        name = $3,
+        description = $4,
+        status = $5,
+        updated_at = NOW(),
+        last_seen = NOW()
+    `;
+
+    await this.db.query(devicesQuery, [
+      device.id,
+      device.device_id || device.id,
+      device.name,
+      device.description || '',
+      device.status,
+    ]);
+
+    // Then, insert or update the gsm_devices table
+    const gsmConfig: Partial<GSMDeviceConfig> = device.gsmConfig || {};
+    const connectionConfig: Partial<ConnectionConfig> = device.connectionConfig || {};
+
+    const gsmDevicesQuery = `
+      INSERT INTO gsm_devices (
+        device_id, imei, iccid, imsi, apn, apn_username, apn_password,
+        mqtt_client_id, mqtt_username, mqtt_password, mqtt_broker_host,
+        mqtt_broker_port, mqtt_use_tls, mqtt_topic_prefix,
+        modem_model, firmware_version, signal_strength, signal_quality,
+        network_type, operator, battery_voltage, battery_percentage,
+        power_mode, publish_interval, heartbeat_interval, enable_ota,
+        created_at, updated_at
+      )
+      VALUES (
+        $1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14,
+        $15, $16, $17, $18, $19, $20, $21, $22, $23, $24, $25, $26,
+        NOW(), NOW()
+      )
+      ON CONFLICT (device_id) DO UPDATE SET
+        signal_strength = $17,
+        signal_quality = $18,
+        network_type = $19,
+        operator = $20,
+        battery_voltage = $21,
+        battery_percentage = $22,
         updated_at = NOW()
     `;
 
-    await this.db.query(query, [
+    await this.db.query(gsmDevicesQuery, [
       device.id,
-      device.name,
-      device.type,
-      device.status,
-      device.protocol,
-      JSON.stringify({
-        ...device.connectionConfig,
-        gsmConfig: device.gsmConfig,
-      }) as unknown as Record<string, unknown>,
+      gsmConfig.imei || '',
+      gsmConfig.iccid || '',
+      gsmConfig.imsi || '',
+      gsmConfig.apn || (connectionConfig.options as any)?.apn || 'internet',
+      gsmConfig.apn_username || '',
+      gsmConfig.apn_password || '',
+      gsmConfig.mqtt_client_id || `gsm-${device.id}`,
+      (connectionConfig.options as any)?.mqttUsername || '',
+      (connectionConfig.options as any)?.mqttPassword || '',
+      connectionConfig.host || 'mqtt.webscada.io',
+      connectionConfig.port || 8883,
+      true,
+      `webscada/gsm/${device.id}`,
+      gsmConfig.modem_model || 'SIM7600',
+      gsmConfig.firmware_version || '1.0.0',
+      (gsmConfig as any).signal_strength || 0,
+      (gsmConfig as any).signal_quality || 0,
+      (gsmConfig as any).network_type || '4G',
+      (gsmConfig as any).operator || '',
+      (gsmConfig as any).battery_voltage || 0,
+      (gsmConfig as any).battery_percentage || 0,
+      (gsmConfig as any).power_mode || 'NORMAL',
+      gsmConfig.publish_interval || 60000,
+      gsmConfig.heartbeat_interval || 300000,
+      gsmConfig.enable_ota !== false,
     ]);
   }
 
   private async deleteDeviceFromDatabase(deviceId: string): Promise<void> {
-    const query = 'DELETE FROM devices WHERE id = $1';
-    await this.db.query(query, [deviceId]);
+    // Delete from gsm_devices first (foreign key constraint)
+    const gsmQuery = 'DELETE FROM gsm_devices WHERE device_id = $1';
+    await this.db.query(gsmQuery, [deviceId]);
+
+    // Then delete from base devices table
+    const devicesQuery = 'DELETE FROM devices WHERE id = $1';
+    await this.db.query(devicesQuery, [deviceId]);
   }
 
   private async getDeviceFromDatabase(deviceId: string): Promise<GSMDevice | null> {
-    const query = 'SELECT * FROM devices WHERE id = $1';
+    const query = `
+      SELECT
+        d.id, d.device_id, d.name, d.description, d.device_type, d.status,
+        d.latitude, d.longitude, d.altitude, d.location_name,
+        d.tags, d.metadata, d.created_at, d.updated_at, d.last_seen,
+        g.imei, g.iccid, g.imsi, g.apn, g.apn_username, g.apn_password,
+        g.mqtt_client_id, g.mqtt_username, g.mqtt_password,
+        g.mqtt_broker_host, g.mqtt_broker_port, g.mqtt_use_tls, g.mqtt_topic_prefix,
+        g.modem_model, g.firmware_version,
+        g.signal_strength, g.signal_quality, g.network_type, g.operator,
+        g.battery_voltage, g.battery_percentage, g.power_mode,
+        g.publish_interval, g.heartbeat_interval, g.enable_ota
+      FROM devices d
+      INNER JOIN gsm_devices g ON d.id = g.device_id
+      WHERE d.id = $1
+    `;
     const result = await this.db.query<any>(query, [deviceId]);
 
     if (result.length === 0) {
@@ -344,9 +421,21 @@ export class GSMService {
 
   private async getDevicesFromDatabase(): Promise<GSMDevice[]> {
     const query = `
-      SELECT * FROM devices
-      WHERE protocol IN ('GSM_HTTP', 'GSM_MQTT')
-      ORDER BY created_at DESC
+      SELECT
+        d.id, d.device_id, d.name, d.description, d.device_type, d.status,
+        d.latitude, d.longitude, d.altitude, d.location_name,
+        d.tags, d.metadata, d.created_at, d.updated_at, d.last_seen,
+        g.imei, g.iccid, g.imsi, g.apn, g.apn_username, g.apn_password,
+        g.mqtt_client_id, g.mqtt_username, g.mqtt_password,
+        g.mqtt_broker_host, g.mqtt_broker_port, g.mqtt_use_tls, g.mqtt_topic_prefix,
+        g.modem_model, g.firmware_version,
+        g.signal_strength, g.signal_quality, g.network_type, g.operator,
+        g.battery_voltage, g.battery_percentage, g.power_mode,
+        g.publish_interval, g.heartbeat_interval, g.enable_ota
+      FROM devices d
+      INNER JOIN gsm_devices g ON d.id = g.device_id
+      WHERE d.device_type = 'GSM_ESP32'
+      ORDER BY d.created_at DESC
     `;
     const result = await this.db.query<any>(query);
 
@@ -540,30 +629,68 @@ export class GSMService {
   }
 
   private mapRowToGSMDevice(row: any): GSMDevice {
-    const config =
-      typeof row.connection_config === 'string'
-        ? JSON.parse(row.connection_config)
-        : row.connection_config;
-
     return {
       id: row.id,
-      device_id: row.device_id || row.id,
+      device_id: row.device_id,
       name: row.name,
-      device_type: row.device_type || row.type,
-      type: row.type,
+      description: row.description || '',
+      device_type: row.device_type,
+      type: row.device_type,
       status: row.status,
-      protocol: row.protocol,
-      config: config,
+      protocol: 'GSM_MQTT',
+      config: {
+        imei: row.imei,
+        iccid: row.iccid,
+        imsi: row.imsi,
+        apn: row.apn,
+        apn_username: row.apn_username,
+        apn_password: row.apn_password,
+        mqtt_client_id: row.mqtt_client_id,
+        mqtt_username: row.mqtt_username,
+        mqtt_password: row.mqtt_password,
+        mqtt_broker_host: row.mqtt_broker_host,
+        mqtt_broker_port: row.mqtt_broker_port,
+        mqtt_use_tls: row.mqtt_use_tls,
+        mqtt_topic_prefix: row.mqtt_topic_prefix,
+        modem_model: row.modem_model,
+        firmware_version: row.firmware_version,
+        publish_interval: row.publish_interval,
+        heartbeat_interval: row.heartbeat_interval,
+        enable_ota: row.enable_ota,
+      },
       connectionConfig: {
-        host: config.host,
-        port: config.port,
-        timeout: config.timeout,
-        retryAttempts: config.retryAttempts,
-        retryDelay: config.retryDelay,
-        options: config.gsmConfig,
+        host: row.mqtt_broker_host || 'mqtt.webscada.io',
+        port: row.mqtt_broker_port || 8883,
+        timeout: 30000,
+        retryAttempts: 3,
+        retryDelay: 5000,
+        options: {
+          apn: row.apn,
+          mqttUsername: row.mqtt_username,
+          mqttPassword: row.mqtt_password,
+        },
       } as any,
-      gsmConfig: config.gsmConfig || {},
-      tags: [],
+      gsmConfig: {
+        imei: row.imei,
+        iccid: row.iccid,
+        imsi: row.imsi,
+        apn: row.apn,
+        apn_username: row.apn_username,
+        apn_password: row.apn_password,
+        mqtt_client_id: row.mqtt_client_id,
+        mqtt_username: row.mqtt_username,
+        mqtt_password: row.mqtt_password,
+        mqtt_broker_host: row.mqtt_broker_host,
+        mqtt_broker_port: row.mqtt_broker_port,
+        mqtt_use_tls: row.mqtt_use_tls,
+        mqtt_topic_prefix: row.mqtt_topic_prefix,
+        modem_model: row.modem_model,
+        firmware_version: row.firmware_version,
+        publish_interval: row.publish_interval,
+        heartbeat_interval: row.heartbeat_interval,
+        enable_ota: row.enable_ota,
+      },
+      tags: Array.isArray(row.tags) ? row.tags : [],
       created_at: row.created_at,
       updated_at: row.updated_at,
     };

@@ -12,9 +12,8 @@ export const DEFAULT_LAYERS: LayerConfig[] = [
     description: 'OMS (Operation & Maintenance Station) location points',
     enabled: true,
     color: '#2196F3',
-    icon: '/gis/icons/oms-marker.png',
     zIndex: 10,
-    dataUrl: '/api/gis/oms-locations',
+    dataUrl: '/gis/data/oms-locations.geojson',
   },
   {
     id: LayerType.MAIN_PIPELINE,
@@ -26,7 +25,7 @@ export const DEFAULT_LAYERS: LayerConfig[] = [
     strokeWidth: 4,
     fillOpacity: 0,
     zIndex: 5,
-    dataUrl: '/api/gis/main-pipeline',
+    dataUrl: '/gis/data/main-pipeline.geojson',
   },
   {
     id: LayerType.MINOR_PIPELINE,
@@ -38,7 +37,7 @@ export const DEFAULT_LAYERS: LayerConfig[] = [
     strokeWidth: 2,
     fillOpacity: 0,
     zIndex: 4,
-    dataUrl: '/api/gis/minor-pipeline',
+    dataUrl: '/gis/data/minor-pipeline.geojson',
   },
   {
     id: LayerType.VILLAGE_BOUNDARIES,
@@ -50,7 +49,7 @@ export const DEFAULT_LAYERS: LayerConfig[] = [
     strokeWidth: 2,
     fillOpacity: 0.2,
     zIndex: 1,
-    dataUrl: '/api/gis/boundaries',
+    dataUrl: '/gis/data/boundaries.geojson',
   },
   {
     id: LayerType.AIR_VALVES,
@@ -58,9 +57,8 @@ export const DEFAULT_LAYERS: LayerConfig[] = [
     description: 'Air release valve locations',
     enabled: true,
     color: '#FF9800',
-    icon: '/gis/icons/air-valve.png',
     zIndex: 8,
-    dataUrl: '/api/gis/air-valves',
+    dataUrl: '/gis/data/air-valves.geojson',
   },
   {
     id: LayerType.SQUARE_VALVES,
@@ -68,9 +66,8 @@ export const DEFAULT_LAYERS: LayerConfig[] = [
     description: 'Square valve locations',
     enabled: true,
     color: '#F44336',
-    icon: '/gis/icons/square-valve.png',
     zIndex: 8,
-    dataUrl: '/api/gis/square-valves',
+    dataUrl: '/gis/data/square-valves.geojson',
   },
   {
     id: LayerType.SLUICE_VALVES,
@@ -78,9 +75,8 @@ export const DEFAULT_LAYERS: LayerConfig[] = [
     description: 'Sluice gate valve locations',
     enabled: true,
     color: '#9C27B0',
-    icon: '/gis/icons/sluice-valve.png',
     zIndex: 8,
-    dataUrl: '/api/gis/sluice-valves',
+    dataUrl: '/gis/data/sluice-valves.geojson',
   },
   {
     id: LayerType.NODE_NUMBERS,
@@ -89,7 +85,7 @@ export const DEFAULT_LAYERS: LayerConfig[] = [
     enabled: false,
     color: '#000000',
     zIndex: 15,
-    dataUrl: '/api/gis/node-numbers',
+    dataUrl: '/gis/data/node-numbers.geojson',
   },
 ];
 

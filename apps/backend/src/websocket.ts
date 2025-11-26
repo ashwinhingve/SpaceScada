@@ -1,7 +1,7 @@
+import { EventType, ScadaEvent, GSMEvent, GSMEventType } from '@webscada/shared-types';
+import { createLogger } from '@webscada/utils';
 import { FastifyInstance } from 'fastify';
 import { Server } from 'socket.io';
-import { createLogger } from '@webscada/utils';
-import { EventType, ScadaEvent, GSMEvent, GSMEventType } from '@webscada/shared-types';
 
 const logger = createLogger({ prefix: 'WebSocket' });
 

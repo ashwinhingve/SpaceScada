@@ -1,17 +1,18 @@
-import Fastify, { FastifyInstance } from 'fastify';
 import cors from '@fastify/cors';
 import helmet from '@fastify/helmet';
 import rateLimit from '@fastify/rate-limit';
+import Fastify, { FastifyInstance } from 'fastify';
+
 import { config } from './config';
-import { logInfo } from './utils/logger';
 import { errorHandler } from './middleware/error-handler';
-import { WebSocketServer } from './websocket';
-import { SimulationEngine } from './simulation/engine';
-import { DeviceService } from './services/device-service';
-import { MetricsService } from './services/metrics-service';
 import { deviceRoutes } from './routes/devices';
 import { healthRoutes } from './routes/health';
 import { metricsRoutes } from './routes/metrics';
+import { DeviceService } from './services/device-service';
+import { MetricsService } from './services/metrics-service';
+import { SimulationEngine } from './simulation/engine';
+import { logInfo } from './utils/logger';
+import { WebSocketServer } from './websocket';
 
 export const createServer = async (): Promise<FastifyInstance> => {
   const server = Fastify({

@@ -1,5 +1,5 @@
-import { FastifyInstance, FastifyRequest, FastifyReply } from 'fastify';
 import { Device, ApiResponse } from '@webscada/shared-types';
+import { FastifyInstance, FastifyRequest, FastifyReply } from 'fastify';
 
 export const deviceRoutes = async (server: FastifyInstance) => {
   // GET /api/devices
@@ -71,7 +71,7 @@ export const deviceRoutes = async (server: FastifyInstance) => {
   server.delete<{ Params: { id: string } }>(
     '/:id',
     async (request: FastifyRequest<{ Params: { id: string } }>, reply: FastifyReply) => {
-      const { id } = request.params;
+      const { id: _id } = request.params;
 
       // TODO: Delete device from database
       const response: ApiResponse<void> = {

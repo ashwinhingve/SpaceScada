@@ -1,5 +1,5 @@
-import { Pool, PoolClient } from 'pg';
 import { createLogger } from '@webscada/utils';
+import { Pool, PoolClient } from 'pg';
 
 const logger = createLogger({ prefix: 'Database' });
 

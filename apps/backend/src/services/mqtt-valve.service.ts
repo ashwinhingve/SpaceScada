@@ -3,9 +3,10 @@
  * Handles MQTT communication for valve control and monitoring
  */
 
-import mqtt from 'mqtt';
-import type { Server as SocketIOServer } from 'socket.io';
 import { createLogger } from '@webscada/utils';
+import mqtt from 'mqtt';
+
+import type { Server as SocketIOServer } from 'socket.io';
 
 const logger = createLogger({ prefix: 'MQTTValveService' });
 

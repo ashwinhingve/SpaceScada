@@ -56,7 +56,7 @@ export class OPCUAAdapter extends BaseProtocolAdapter {
     // TODO: Implement actual OPC UA write
   }
 
-  subscribe(tags: Tag[], callback: (tag: Tag) => void): void {
+  subscribe(tags: Tag[], _callback: (tag: Tag) => void): void {
     if (!this.connected) {
       throw new Error('Not connected to server');
     }

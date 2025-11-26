@@ -1,14 +1,11 @@
-import { Server as SocketIOServer, Socket } from 'socket.io';
 import { Server as HTTPServer } from 'http';
+
+import { Server as SocketIOServer, Socket } from 'socket.io';
+
 import { config } from '../config';
-import { logInfo, logError, logDebug } from '../utils/logger';
 import { MetricsService } from '../services/metrics-service';
-import {
-  WebSocketEvent,
-  SubscribePayload,
-  UnsubscribePayload,
-  ConnectionInfo,
-} from '../types';
+import { WebSocketEvent, SubscribePayload, UnsubscribePayload, ConnectionInfo } from '../types';
+import { logInfo, logError, logDebug } from '../utils/logger';
 
 export class WebSocketServer {
   private io: SocketIOServer;

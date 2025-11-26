@@ -1,11 +1,12 @@
 import { Pool } from 'pg';
 import { Server as SocketIOServer } from 'socket.io';
-import { GSMService } from '../services/gsm.service';
-import { ESP32Service } from '../services/esp32.service';
-import { WiFiService } from '../services/wifi.service';
+
 import { BluetoothService } from '../services/bluetooth.service';
-import { TelemetryService } from '../services/telemetry.service';
+import { ESP32Service } from '../services/esp32.service';
+import { GSMService } from '../services/gsm.service';
 import { LogsService } from '../services/logs.service';
+import { TelemetryService } from '../services/telemetry.service';
+import { WiFiService } from '../services/wifi.service';
 
 declare module 'fastify' {
   interface FastifyInstance {

@@ -3,9 +3,10 @@
  * Handles Bluetooth and BLE device management operations
  */
 
-import { Pool } from 'pg';
-import { DatabaseService } from './database';
 import { createLogger } from '@webscada/utils';
+import { Pool } from 'pg';
+
+import { DatabaseService } from './database';
 
 const logger = createLogger({ prefix: 'BluetoothService' });
 
@@ -235,10 +236,14 @@ export class BluetoothService {
         ]
       );
 
-      logger.info('Bluetooth device created', { id: result.rows[0].id, macAddress: deviceData.mac_address });
+      logger.info('Bluetooth device created', {
+        id: result.rows[0].id,
+        macAddress: deviceData.mac_address,
+      });
       return result.rows[0];
     } catch (error: any) {
-      if (error.code === '23505') { // Unique violation
+      if (error.code === '23505') {
+        // Unique violation
         throw new Error('Bluetooth device with this MAC address already exists');
       }
       logger.error('Failed to create Bluetooth device', { error });

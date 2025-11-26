@@ -1,6 +1,5 @@
 import {
   ConnectionConfig,
-  Tag,
   TagValue,
   GSMConfig,
   GSMNetworkStatus,
@@ -8,8 +7,6 @@ import {
   SMSMessage,
   SendSMSRequest,
   SendSMSResponse,
-  GSMCommand,
-  CommandStatus,
 } from '@webscada/shared-types';
 import { createLogger } from '@webscada/utils';
 
@@ -297,7 +294,7 @@ export class GSMAdapter extends BaseProtocolAdapter {
 
     try {
       // Custom command or query from module
-      const response = await this.sendATCommand('AT+CPSI?');
+      const _response = await this.sendATCommand('AT+CPSI?');
 
       // TODO: Parse actual data usage from response
       return {

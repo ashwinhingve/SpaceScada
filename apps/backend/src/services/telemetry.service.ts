@@ -3,9 +3,10 @@
  * Handles time-series telemetry data storage and retrieval for all device types
  */
 
-import { Pool } from 'pg';
-import { DatabaseService } from './database';
 import { createLogger } from '@webscada/utils';
+import { Pool } from 'pg';
+
+import { DatabaseService } from './database';
 
 const logger = createLogger({ prefix: 'TelemetryService' });
 
@@ -163,10 +164,7 @@ export class TelemetryService {
    */
   async getTelemetry(query: TelemetryQuery): Promise<TelemetryRecord[]> {
     try {
-      const conditions: string[] = [
-        'device_id = $1',
-        'device_type = $2',
-      ];
+      const conditions: string[] = ['device_id = $1', 'device_type = $2'];
       const params: any[] = [query.device_id, query.device_type];
       let paramIndex = 3;
 
@@ -220,10 +218,7 @@ export class TelemetryService {
       const aggregation = query.aggregation || 'hourly';
       const truncFunc = aggregation === 'daily' ? 'day' : 'hour';
 
-      const conditions: string[] = [
-        'device_id = $1',
-        'device_type = $2',
-      ];
+      const conditions: string[] = ['device_id = $1', 'device_type = $2'];
       const params: any[] = [query.device_id, query.device_type];
       let paramIndex = 3;
 
@@ -269,7 +264,10 @@ export class TelemetryService {
   /**
    * Get latest telemetry values for all metrics of a device
    */
-  async getLatestTelemetry(deviceId: string, deviceType: DeviceType): Promise<Record<string, TelemetryRecord>> {
+  async getLatestTelemetry(
+    deviceId: string,
+    deviceType: DeviceType
+  ): Promise<Record<string, TelemetryRecord>> {
     try {
       const sql = `
         SELECT DISTINCT ON (metric_name)
@@ -307,10 +305,7 @@ export class TelemetryService {
    */
   async cleanupOldTelemetry(retentionDays: number = 90): Promise<number> {
     try {
-      const result = await this.db.query(
-        'SELECT cleanup_old_telemetry($1)',
-        [retentionDays]
-      );
+      const result = await this.db.query('SELECT cleanup_old_telemetry($1)', [retentionDays]);
 
       const deletedCount = result.rows[0].cleanup_old_telemetry;
       logger.info('Old telemetry cleaned up', { deletedCount, retentionDays });
@@ -325,7 +320,11 @@ export class TelemetryService {
   /**
    * Get telemetry statistics for a device
    */
-  async getTelemetryStats(deviceId: string, deviceType: DeviceType, metricName?: string): Promise<any> {
+  async getTelemetryStats(
+    deviceId: string,
+    deviceType: DeviceType,
+    metricName?: string
+  ): Promise<any> {
     try {
       const conditions = ['device_id = $1', 'device_type = $2'];
       const params: any[] = [deviceId, deviceType];

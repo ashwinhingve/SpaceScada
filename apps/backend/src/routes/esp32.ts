@@ -1,4 +1,3 @@
-import { FastifyInstance, FastifyRequest, FastifyReply } from 'fastify';
 import {
   ESP32Device,
   ESP32ControlCommand,
@@ -8,8 +7,10 @@ import {
   ProtocolType,
   ESP32SensorType,
 } from '@webscada/shared-types';
-import { ESP32Service } from '../services/esp32.service';
 import { createLogger } from '@webscada/utils';
+import { FastifyInstance, FastifyRequest, FastifyReply } from 'fastify';
+
+import { ESP32Service } from '../services/esp32.service';
 
 const logger = createLogger({ prefix: 'ESP32Routes' });
 
@@ -225,16 +226,17 @@ export const esp32Routes = async (server: FastifyInstance) => {
           ...existingDevice,
           name: body.name || existingDevice.name,
           esp32Config: {
-            mqttClientId: body.mqttClientId || existingConfig?.mqttClientId || `esp32_${Date.now()}`,
-            mqttTopic: body.mqttTopic || existingConfig?.mqttTopic || `esp32/${existingDevice.device_id}`,
+            mqttClientId:
+              body.mqttClientId || existingConfig?.mqttClientId || `esp32_${Date.now()}`,
+            mqttTopic:
+              body.mqttTopic || existingConfig?.mqttTopic || `esp32/${existingDevice.device_id}`,
             mqttBroker: body.mqttBroker || existingConfig?.mqttBroker || 'localhost',
             mqttPort: body.mqttPort || existingConfig?.mqttPort || 1883,
             mqttUsername: body.mqttUsername || existingConfig?.mqttUsername,
             mqttPassword: body.mqttPassword || existingConfig?.mqttPassword,
             wifiSSID: body.wifiSSID || existingConfig?.wifiSSID,
             publishInterval: body.publishInterval || existingConfig?.publishInterval || 5000,
-            heartbeatInterval:
-              body.heartbeatInterval || existingConfig?.heartbeatInterval || 15000,
+            heartbeatInterval: body.heartbeatInterval || existingConfig?.heartbeatInterval || 15000,
             sensorType: body.sensorType || existingConfig?.sensorType,
             sensors: body.sensors || existingConfig?.sensors || [],
             gpioConfig: body.gpioConfig || existingConfig?.gpioConfig,

@@ -12,14 +12,20 @@ const updateProfileSchema = z.object({
   avatarUrl: z.string().url().optional(),
 });
 
-const updatePasswordSchema = z.object({
-  currentPassword: z.string().min(8),
-  newPassword: z.string().min(8).max(100),
-  confirmPassword: z.string().min(8).max(100),
-}).refine((data: { newPassword: string; confirmPassword: string }) => data.newPassword === data.confirmPassword, {
-  message: "Passwords don't match",
-  path: ["confirmPassword"],
-});
+const updatePasswordSchema = z
+  .object({
+    currentPassword: z.string().min(8),
+    newPassword: z.string().min(8).max(100),
+    confirmPassword: z.string().min(8).max(100),
+  })
+  .refine(
+    (data: { newPassword: string; confirmPassword: string }) =>
+      data.newPassword === data.confirmPassword,
+    {
+      message: "Passwords don't match",
+      path: ['confirmPassword'],
+    }
+  );
 
 const updateSettingsSchema = z.object({
   theme: z.enum(['light', 'dark', 'auto']).optional(),
@@ -138,7 +144,7 @@ export default async function usersRoutes(fastify: FastifyInstance) {
   fastify.post('/api/users/me/password', async (request: FastifyRequest, reply: FastifyReply) => {
     try {
       const userId = '00000000-0000-0000-0000-000000000001';
-      const data = updatePasswordSchema.parse(request.body);
+      const _data = updatePasswordSchema.parse(request.body);
 
       // In production, verify current password
       // const bcrypt = require('bcrypt');
@@ -178,10 +184,7 @@ export default async function usersRoutes(fastify: FastifyInstance) {
     try {
       const userId = '00000000-0000-0000-0000-000000000001';
 
-      const result = await pg.query(
-        'SELECT * FROM user_settings WHERE user_id = $1',
-        [userId]
-      );
+      const result = await pg.query('SELECT * FROM user_settings WHERE user_id = $1', [userId]);
 
       if (result.rows.length === 0) {
         // Create default settings
@@ -288,10 +291,9 @@ export default async function usersRoutes(fastify: FastifyInstance) {
         [userId, limit, offset]
       );
 
-      const countResult = await pg.query(
-        'SELECT COUNT(*) FROM activity_logs WHERE user_id = $1',
-        [userId]
-      );
+      const countResult = await pg.query('SELECT COUNT(*) FROM activity_logs WHERE user_id = $1', [
+        userId,
+      ]);
 
       reply.send({
         activities: result.rows,

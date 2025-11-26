@@ -4,6 +4,7 @@ import React, { useEffect, useState } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Layers, Radio, Database, Activity, AlertCircle, CheckCircle2, MapPin } from 'lucide-react';
 import { lorawanAPI } from '@/core/api/endpoints';
+import { DeviceStatus } from '@webscada/shared-types';
 import type { LoRaWANApplication, LoRaWANGateway, LoRaWANDevice } from '@/core/api/endpoints';
 import { GISDashboard } from '@/components/gis/GISDashboard';
 
@@ -40,7 +41,7 @@ export default function LoRaWANDashboard() {
         gateways: gateways.length,
         devices: devices.length,
         onlineGateways: gateways.filter((g) => g.status === 'online').length,
-        activeDevices: devices.filter((d) => d.status === 'active').length,
+        activeDevices: devices.filter((d) => d.status === DeviceStatus.ONLINE).length,
       });
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to load statistics');

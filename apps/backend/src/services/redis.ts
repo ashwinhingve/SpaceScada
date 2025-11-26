@@ -1,5 +1,5 @@
-import Redis from 'ioredis';
 import { createLogger } from '@webscada/utils';
+import Redis from 'ioredis';
 
 const logger = createLogger({ prefix: 'Redis' });
 

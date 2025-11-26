@@ -1,3 +1,4 @@
+import { MQTTAdapter } from '@webscada/protocols';
 import {
   ESP32Device,
   ESP32SensorData,
@@ -5,13 +6,12 @@ import {
   ESP32ControlCommand,
   ESP32Action,
   ESP32HeartbeatPayload,
-  ESP32EventType,
   DeviceStatus,
 } from '@webscada/shared-types';
-import { MQTTAdapter } from '@webscada/protocols';
-import { DatabaseService } from './database';
 import { createLogger } from '@webscada/utils';
 import { Server as SocketIOServer } from 'socket.io';
+
+import { DatabaseService } from './database';
 
 const logger = createLogger({ prefix: 'ESP32Service' });
 
@@ -212,7 +212,7 @@ export class ESP32Service {
         case ESP32Action.CUSTOM:
           payload = {
             action: 'custom',
-            ...(command.customCommand ? JSON.parse(command.customCommand) : {})
+            ...(command.customCommand ? JSON.parse(command.customCommand) : {}),
           };
           break;
       }
@@ -577,7 +577,7 @@ export class ESP32Service {
         mqttClientId: '',
         mqttTopic: '',
         publishInterval: 5000,
-        sensors: []
+        sensors: [],
       },
       connectionConfig: {
         host: 'localhost', // MQTT broker host

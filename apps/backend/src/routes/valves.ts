@@ -3,10 +3,11 @@
  * Provides endpoints for valve control and monitoring
  */
 
-import { FastifyInstance, FastifyRequest, FastifyReply } from 'fastify';
-import { mqttValveService } from '../services/mqtt-valve.service';
-import { influxTimeSeriesService } from '../services/influx-timeseries.service';
 import { createLogger } from '@webscada/utils';
+import { FastifyInstance, FastifyRequest, FastifyReply } from 'fastify';
+
+import { influxTimeSeriesService } from '../services/influx-timeseries.service';
+import { mqttValveService } from '../services/mqtt-valve.service';
 
 const logger = createLogger({ prefix: 'ValveRoutes' });
 

@@ -4,6 +4,10 @@
  */
 
 import { apiClient } from '../client';
+import type { LoRaWANDevice } from '@webscada/shared-types';
+
+// Re-export for convenience
+export type { LoRaWANDevice };
 
 // ============================================================================
 // Types
@@ -33,23 +37,7 @@ export interface LoRaWANGateway {
   created_at: Date;
 }
 
-export interface LoRaWANDevice {
-  id: string;
-  name: string;
-  description?: string;
-  dev_eui: string;
-  application_id: string;
-  device_profile_id?: string;
-  status: 'active' | 'inactive' | 'pending';
-  activation_mode: 'OTAA' | 'ABP';
-  keys?: {
-    app_key?: string;
-    nwk_s_key?: string;
-    app_s_key?: string;
-  };
-  created_at: Date;
-  updated_at: Date;
-}
+// LoRaWANDevice is imported from @webscada/shared-types
 
 export interface DeviceDownlink {
   dev_eui: string;
@@ -168,7 +156,10 @@ export const lorawanDevicesAPI = {
   /**
    * Get all devices
    */
-  getAll: async (params?: { applicationId?: string; status?: string }): Promise<LoRaWANDevice[]> => {
+  getAll: async (params?: {
+    applicationId?: string;
+    status?: string;
+  }): Promise<LoRaWANDevice[]> => {
     const response: any = await apiClient.get('/api/lorawan/devices', params);
     return response.data || response || [];
   },

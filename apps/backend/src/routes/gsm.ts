@@ -1,4 +1,3 @@
-import { FastifyInstance, FastifyRequest, FastifyReply } from 'fastify';
 import {
   GSMDevice,
   ApiResponse,
@@ -11,9 +10,11 @@ import {
   SMSDirection,
   SMSStatus,
 } from '@webscada/shared-types';
+import { FastifyInstance, FastifyRequest, FastifyReply } from 'fastify';
+
 import { GSMService } from '../services/gsm.service';
-import { TelemetryService } from '../services/telemetry.service';
 import { LogsService } from '../services/logs.service';
+import { TelemetryService } from '../services/telemetry.service';
 
 /**
  * GSM Device Routes
@@ -446,13 +447,7 @@ export const gsmRoutes = async (server: FastifyInstance) => {
     async (request: FastifyRequest<{ Params: { id: string } }>, reply: FastifyReply) => {
       try {
         const { id } = request.params;
-        const {
-          metric_name,
-          start_time,
-          end_time,
-          limit,
-          aggregation,
-        } = request.query as any;
+        const { metric_name, start_time, end_time, limit, aggregation } = request.query as any;
 
         const query: any = {
           device_id: id,
@@ -622,13 +617,7 @@ export const gsmRoutes = async (server: FastifyInstance) => {
     async (request: FastifyRequest<{ Params: { id: string } }>, reply: FastifyReply) => {
       try {
         const { id } = request.params;
-        const {
-          log_level,
-          event_type,
-          start_time,
-          end_time,
-          limit,
-        } = request.query as any;
+        const { log_level, event_type, start_time, end_time, limit } = request.query as any;
 
         const query: any = {
           device_id: id,

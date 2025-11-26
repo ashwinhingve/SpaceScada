@@ -79,16 +79,16 @@ declare namespace google {
       setPosition(latLng: LatLng | LatLngLiteral): void;
       setMap(map: Map | null): void;
       setTitle(title: string): void;
-      setIcon(icon: string | Icon | Symbol): void;
+      setIcon(icon: string | Icon | symbol): void;
       getPosition(): LatLng | null | undefined;
-      addListener(eventName: string, handler: Function): MapsEventListener;
+      addListener(eventName: string, handler: (...args: any[]) => void): MapsEventListener;
     }
 
     interface MarkerOptions {
       position?: LatLng | LatLngLiteral;
       map?: Map;
       title?: string;
-      icon?: string | Icon | Symbol;
+      icon?: string | Icon | symbol;
       label?: string | MarkerLabel;
       animation?: Animation;
       clickable?: boolean;
@@ -169,7 +169,7 @@ declare namespace google {
       function addListener(
         instance: any,
         eventName: string,
-        handler: Function
+        handler: (...args: any[]) => void
       ): MapsEventListener;
       function removeListener(listener: MapsEventListener): void;
       function clearInstanceListeners(instance: any): void;
@@ -190,7 +190,11 @@ declare namespace google {
       add(feature: Data.Feature | Data.FeatureOptions): Data.Feature;
       addGeoJson(geoJson: any, options?: Data.GeoJsonOptions): Data.Feature[];
       forEach(callback: (feature: Data.Feature) => void): void;
-      loadGeoJson(url: string, options?: Data.GeoJsonOptions, callback?: (features: Data.Feature[]) => void): void;
+      loadGeoJson(
+        url: string,
+        options?: Data.GeoJsonOptions,
+        callback?: (features: Data.Feature[]) => void
+      ): void;
       remove(feature: Data.Feature): void;
       setMap(map: Map | null): void;
       setStyle(style: Data.StylingFunction | Data.StyleOptions): void;
@@ -227,7 +231,7 @@ declare namespace google {
         strokeColor?: string;
         strokeOpacity?: number;
         strokeWeight?: number;
-        icon?: string | Icon | Symbol;
+        icon?: string | Icon | symbol;
         visible?: boolean;
         zIndex?: number;
         clickable?: boolean;

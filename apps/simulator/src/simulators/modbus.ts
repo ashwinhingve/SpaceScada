@@ -1,4 +1,5 @@
 import { createLogger } from '@webscada/utils';
+
 import { DataGenerator } from '../generators/data';
 
 const logger = createLogger({ prefix: 'ModbusSimulator' });

@@ -8,17 +8,7 @@
 // NEW PRODUCTION TYPES
 // ============================================
 
-// Device types (3 device types: GSM ESP32, LoRaWAN, Standard MQTT)
-export * from './devices';
-
-// Alarm types
-export * from './alarms';
-
-// API types
-export * from './api';
-
-// ESP32 types
-export * from './esp32';
+// Types are explicitly exported below to avoid duplicate exports
 
 // ============================================
 // LEGACY TYPES (Backward Compatibility)
@@ -108,21 +98,32 @@ export enum Permission {
 }
 
 // ============================================
-// RE-EXPORTS FOR CONVENIENCE
+// EXPLICIT EXPORTS (Avoiding duplicate exports)
 // ============================================
 
-// Device types re-export
+// Device types export
 export type {
   // Main device types
   Device,
   GSMDevice,
   LoRaWANDevice,
   StandardMQTTDevice,
+  WiFiDevice,
+  BluetoothDevice,
 
   // Device configs
   GSMDeviceConfig,
   LoRaWANDeviceConfig,
   StandardMQTTDeviceConfig,
+  WiFiDeviceConfig,
+  BluetoothDeviceConfig,
+
+  // Device status types
+  GSMDeviceStatus,
+  LoRaWANDeviceStatus,
+  StandardMQTTDeviceStatus,
+  WiFiDeviceStatus,
+  BluetoothDeviceStatus,
 
   // Telemetry
   TelemetryDataPoint,
@@ -140,6 +141,10 @@ export type {
   SendSMSRequest,
   SendSMSResponse,
   GSMCommand,
+
+  // Events
+  GSMEvent,
+  ScadaEvent,
 } from './devices';
 
 export {
@@ -148,10 +153,14 @@ export {
   DeviceStatus,
   ConnectionStatus,
   LoRaWANActivation,
+  LoRaWANDeviceClass,
   NetworkType,
   PowerMode,
   CommandStatus as DeviceCommandStatus,
+  CommandStatus,
   CommandType,
+  WiFiChipset,
+  BluetoothProtocol,
 
   // GSM Protocol Adapter enums
   SignalQuality,
@@ -159,6 +168,9 @@ export {
   SMSStatus,
   SMSDirection,
   GPSFixType,
+
+  // Event enums
+  GSMEventType,
 
   // Type guards
   isGSMDevice,
@@ -183,3 +195,16 @@ export type {
 } from './api';
 
 export { WebSocketMessageType, SparkplugBDataType } from './api';
+
+// ESP32 types export
+export type {
+  ESP32Device,
+  ESP32SensorConfig,
+  ESP32SensorData,
+  ESP32ControlState,
+  ESP32ControlCommand,
+  ESP32HeartbeatPayload,
+  ESP32Event,
+} from './esp32';
+
+export { ESP32SensorType, ESP32Action, ESP32EventType } from './esp32';

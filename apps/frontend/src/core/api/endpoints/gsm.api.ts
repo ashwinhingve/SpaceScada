@@ -75,6 +75,14 @@ export const gsmDevicesAPI = {
   },
 
   /**
+   * Update GSM device
+   */
+  update: async (id: string, data: Partial<GSMDevice>): Promise<GSMDevice> => {
+    const response: any = await apiClient.put(`/gsm/devices/${id}`, data);
+    return response.data || response;
+  },
+
+  /**
    * Delete GSM device
    */
   delete: async (id: string): Promise<void> => {
@@ -150,7 +158,10 @@ export const gsmNetworkAPI = {
   /**
    * Get network status history
    */
-  getHistory: async (deviceId: string, params?: GPSHistoryParams): Promise<NetworkStatusHistory[]> => {
+  getHistory: async (
+    deviceId: string,
+    params?: GPSHistoryParams
+  ): Promise<NetworkStatusHistory[]> => {
     const response: any = await apiClient.get(`/gsm/devices/${deviceId}/network/history`, params);
     return response.data || response || [];
   },

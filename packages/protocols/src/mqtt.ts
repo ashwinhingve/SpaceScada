@@ -1,6 +1,6 @@
-import mqtt from 'mqtt';
 import { ConnectionConfig, Tag, TagValue } from '@webscada/shared-types';
 import { createLogger } from '@webscada/utils';
+import mqtt from 'mqtt';
 
 import { BaseProtocolAdapter } from './base';
 
@@ -99,7 +99,7 @@ export class MQTTAdapter extends BaseProtocolAdapter {
     });
   }
 
-  async read(address: string): Promise<TagValue> {
+  async read(_address: string): Promise<TagValue> {
     // MQTT is publish/subscribe, so direct read operations are not supported
     throw new Error('Direct read not supported for MQTT. Use subscribe instead.');
   }

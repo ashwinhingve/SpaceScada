@@ -8,6 +8,7 @@ import { Badge } from '@/components/ui/badge';
 import { Database, Plus, Trash2, Edit, ExternalLink, Wifi, Key } from 'lucide-react';
 import { DeviceList } from '@/features/devices/components/device-list/DeviceList';
 import { lorawanAPI } from '@/core/api/endpoints';
+import { DeviceStatus } from '@webscada/shared-types';
 import type { LoRaWANDevice } from '@/core/api/endpoints';
 
 /**
@@ -83,7 +84,7 @@ export default function DevicesPage() {
                   <Badge className={getStatusColor(dev.status)}>{dev.status}</Badge>
                 </CardTitle>
                 <CardDescription className="text-gray-400">
-                  {dev.description || dev.dev_eui}
+                  {dev.description || dev.config?.dev_eui || dev.device_id}
                 </CardDescription>
               </div>
             </div>
@@ -93,22 +94,24 @@ export default function DevicesPage() {
           <div className="grid grid-cols-2 gap-4 text-sm">
             <div>
               <p className="text-gray-400">DevEUI</p>
-              <p className="text-white font-mono text-xs">{dev.dev_eui}</p>
+              <p className="text-white font-mono text-xs">{dev.config?.dev_eui || 'N/A'}</p>
             </div>
             <div>
-              <p className="text-gray-400">Application</p>
-              <p className="text-white font-medium">{dev.application_id}</p>
+              <p className="text-gray-400">Device ID</p>
+              <p className="text-white font-medium">{dev.device_id}</p>
             </div>
           </div>
 
           <div className="flex items-center gap-2">
-            <Badge className={getActivationModeColor(dev.activation_mode)}>
-              <Key className="h-3 w-3 mr-1" />
-              {dev.activation_mode}
-            </Badge>
-            {dev.device_profile_id && (
+            {dev.config?.activation_mode && (
+              <Badge className={getActivationModeColor(dev.config.activation_mode)}>
+                <Key className="h-3 w-3 mr-1" />
+                {dev.config.activation_mode}
+              </Badge>
+            )}
+            {dev.config?.device_class && (
               <Badge className="bg-gray-700 text-gray-300 border-gray-600">
-                Profile: {dev.device_profile_id.slice(0, 8)}
+                Class: {dev.config.device_class}
               </Badge>
             )}
           </div>
@@ -155,19 +158,19 @@ export default function DevicesPage() {
   const filterTabs = [
     { label: 'All', value: 'all', count: devices.length },
     {
-      label: 'Active',
-      value: 'active',
-      count: devices.filter((d) => d.status === 'active').length,
+      label: 'Online',
+      value: 'online',
+      count: devices.filter((d) => d.status === DeviceStatus.ONLINE).length,
     },
     {
-      label: 'Inactive',
-      value: 'inactive',
-      count: devices.filter((d) => d.status === 'inactive').length,
+      label: 'Offline',
+      value: 'offline',
+      count: devices.filter((d) => d.status === DeviceStatus.OFFLINE).length,
     },
     {
-      label: 'Pending',
-      value: 'pending',
-      count: devices.filter((d) => d.status === 'pending').length,
+      label: 'Provisioning',
+      value: 'provisioning',
+      count: devices.filter((d) => d.status === DeviceStatus.PROVISIONING).length,
     },
   ];
 

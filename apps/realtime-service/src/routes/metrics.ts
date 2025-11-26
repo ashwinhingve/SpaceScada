@@ -1,4 +1,5 @@
 import { FastifyInstance } from 'fastify';
+
 import { MetricsService } from '../services/metrics-service';
 
 export const metricsRoutes = async (fastify: FastifyInstance, metrics: MetricsService) => {

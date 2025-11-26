@@ -1,8 +1,9 @@
 import 'dotenv/config';
 
 import { createLogger } from '@webscada/utils';
-import { ModbusSimulator } from './simulators/modbus';
+
 import { DataGenerator } from './generators/data';
+import { ModbusSimulator } from './simulators/modbus';
 
 const logger = createLogger({ prefix: 'Simulator' });
 
@@ -23,10 +24,11 @@ const start = async () => {
 
     // Start simulator based on protocol
     switch (protocol) {
-      case 'MODBUS_TCP':
+      case 'MODBUS_TCP': {
         const modbusSimulator = new ModbusSimulator(port, dataGenerator);
         await modbusSimulator.start();
         break;
+      }
       default:
         throw new Error(`Unsupported protocol: ${protocol}`);
     }
