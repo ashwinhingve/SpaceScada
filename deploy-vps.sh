@@ -236,9 +236,10 @@ stop_services() {
     print_header "Stopping WebSCADA Services"
     check_root
     check_docker
+    check_env_file
 
     local COMPOSE_CMD=$(get_compose_command)
-    $COMPOSE_CMD -f "$COMPOSE_FILE" down
+    $COMPOSE_CMD --env-file "$ENV_FILE" -f "$COMPOSE_FILE" down
     print_success "Services stopped"
 }
 

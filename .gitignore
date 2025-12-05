@@ -45,6 +45,7 @@ out/
 .env.production.local
 *.env
 .env.backup
+.env.production
 
 # Debug logs
 npm-debug.log*

@@ -23,8 +23,16 @@ WORKDIR /app
 
 RUN npm install -g pnpm@8.12.0
 
+# Copy node_modules from deps stage
 COPY --from=deps /app/node_modules ./node_modules
-COPY . .
+
+# Copy workspace configuration and all source code
+COPY package.json pnpm-workspace.yaml pnpm-lock.yaml* ./
+COPY packages ./packages
+COPY apps/backend ./apps/backend
+
+# Re-run install to fix workspace links (prefer cached packages)
+RUN pnpm install --frozen-lockfile --prefer-offline
 
 # Build packages
 RUN pnpm --filter @webscada/shared-types build
