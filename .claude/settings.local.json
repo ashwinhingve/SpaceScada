@@ -74,7 +74,15 @@
       "Bash(timeout 120 pnpm type-check)",
       "Bash(timeout 60 pnpm build:*)",
       "Bash(cd /mnt/d/Do Not Open/project/webscada && timeout 240 pnpm build:*)",
-      "Bash(pnpm exec eslint:*)"
+      "Bash(pnpm exec eslint:*)",
+      "Bash(ss:*)",
+      "Bash(netstat:*)",
+      "Bash(cd /mnt/d/Do\\ Not\\ Open/project/webscada && timeout 15 pnpm --filter=backend dev:*)",
+      "Bash(PGPASSWORD='webscada_password' psql:*)",
+      "Bash(for file in migrations/*.sql)",
+      "Bash(do echo \"Running $file...\")",
+      "Bash(PGPASSWORD=webscada_password psql:*)",
+      "Bash(ls:*)"
     ],
     "deny": [],
     "ask": []
