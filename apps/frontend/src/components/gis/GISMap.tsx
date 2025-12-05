@@ -76,14 +76,32 @@ export function GISMap({ apiKey, layers, onMarkerClick, className = '' }: GISMap
           tilt: 45,
         });
 
-        // Mark map instance
+        // Mark map instance immediately
         setMap(mapInstance);
 
-        // ✅ Wait until the map has finished its first render
-        gmaps.event.addListenerOnce(mapInstance, 'idle', () => {
-          setIsMapReadyForLayers(true);
-          setIsLoading(false);
-        });
+        // ✅ Wait until the map has finished its first render with timeout fallback
+        let timeoutId: NodeJS.Timeout;
+        let idleHandled = false;
+
+        const handleMapReady = () => {
+          if (!idleHandled) {
+            idleHandled = true;
+            clearTimeout(timeoutId);
+            setIsMapReadyForLayers(true);
+            setIsLoading(false);
+            console.log('Google Maps loaded successfully');
+          }
+        };
+
+        gmaps.event.addListenerOnce(mapInstance, 'idle', handleMapReady);
+
+        // Fallback: if 'idle' doesn't fire within 5 seconds, proceed anyway
+        timeoutId = setTimeout(() => {
+          if (!idleHandled) {
+            console.warn('Map idle event timeout - proceeding anyway');
+            handleMapReady();
+          }
+        }, 5000);
       })
       .catch((err) => {
         console.error('Error loading Google Maps:', err);
