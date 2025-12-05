@@ -225,35 +225,6 @@ services:
           cpus: '1'
           memory: 512M
 
-  # ============================================
-  # DEVICE SIMULATOR
-  # ============================================
-
-  simulator:
-    build:
-      context: .
-      dockerfile: infrastructure/docker/simulator.Dockerfile
-    container_name: webscada-simulator
-    restart: always
-    environment:
-      NODE_ENV: production
-      SIMULATOR_PORT: 5020
-      SIMULATOR_PROTOCOL: MODBUS_TCP
-      UPDATE_INTERVAL: 1000
-      MIN_VALUE: 0
-      MAX_VALUE: 100
-      VALUE_CHANGE_RATE: 5
-    # Internal port only
-    expose:
-      - "5020"
-    networks:
-      - webscada-internal
-    deploy:
-      resources:
-        limits:
-          cpus: '0.5'
-          memory: 256M
-
 # ============================================
 # NETWORKS
 # ============================================

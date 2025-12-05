@@ -29,3 +29,23 @@ out
 
 # Turbo
 .turbo
+
+# Removed directories (production cleanup)
+tests/
+infrastructure/k3s/
+infrastructure/helm/
+apps/simulator/
+apps/frontend/public/demo/
+.husky/
+.qodo/
+.claude/
+documents/developer-guides/
+documents/migrations/
+documents/operations/
+documents/user-guides/
+scripts/build-images.sh
+scripts/dev-setup.sh
+scripts/k3s-*.sh
+docker-compose.yml
+docker-compose.production.yml
+skaffold.yaml
