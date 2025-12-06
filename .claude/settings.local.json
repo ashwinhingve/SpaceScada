@@ -2,7 +2,14 @@
   "permissions": {
     "allow": [
       "Bash(timeout 240 pnpm build:*)",
-      "Bash(sudo ./deploy-vps.sh:*)"
+      "Bash(sudo ./deploy-vps.sh:*)",
+      "Bash(sudo docker ps:*)",
+      "Bash(sudo docker logs:*)",
+      "Bash(sudo docker start:*)",
+      "Bash(curl:*)",
+      "Bash(timeout 10 sudo ./deploy-vps.sh logs)",
+      "Bash(sudo docker exec:*)",
+      "Bash(sudo docker inspect:*)"
     ],
     "deny": [],
     "ask": []

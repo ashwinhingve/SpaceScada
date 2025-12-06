@@ -255,7 +255,7 @@ show_logs() {
 
     local COMPOSE_CMD=$(get_compose_command)
     print_info "Showing logs (Ctrl+C to exit)..."
-    $COMPOSE_CMD -f "$COMPOSE_FILE" logs -f
+    $COMPOSE_CMD --env-file "$ENV_FILE" -f "$COMPOSE_FILE" logs -f
 }
 
 show_status() {
@@ -263,7 +263,7 @@ show_status() {
     check_docker
 
     local COMPOSE_CMD=$(get_compose_command)
-    $COMPOSE_CMD -f "$COMPOSE_FILE" ps
+    $COMPOSE_CMD --env-file "$ENV_FILE" -f "$COMPOSE_FILE" ps
 
     echo ""
     print_info "Docker container stats:"
