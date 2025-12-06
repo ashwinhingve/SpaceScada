@@ -9,7 +9,9 @@
       "Bash(curl:*)",
       "Bash(timeout 10 sudo ./deploy-vps.sh logs)",
       "Bash(sudo docker exec:*)",
-      "Bash(sudo docker inspect:*)"
+      "Bash(sudo docker inspect:*)",
+      "Bash(./check-vps-compatibility.sh:*)",
+      "Bash(bash:*)"
     ],
     "deny": [],
     "ask": []
