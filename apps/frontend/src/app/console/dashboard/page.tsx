@@ -105,10 +105,24 @@ export default function ConsoleDashboard() {
             <ArrowRight className="h-4 w-4" />
           </Link>
         </div>
-        <GISDashboard
-          apiKey={process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY || ''}
-          className="h-[400px]"
-        />
+        {process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY ? (
+          <GISDashboard
+            apiKey={process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY}
+            className="h-[400px]"
+          />
+        ) : (
+          <div className="h-[400px] bg-[#1E293B] border border-gray-800 rounded-lg flex items-center justify-center">
+            <div className="text-center text-gray-400">
+              <MapPin className="h-12 w-12 mx-auto mb-3 opacity-50" />
+              <p className="text-lg mb-2">Map View Unavailable</p>
+              <p className="text-sm">
+                Google Maps API key not configured.
+                <br />
+                Set NEXT_PUBLIC_GOOGLE_MAPS_API_KEY in your environment.
+              </p>
+            </div>
+          </div>
+        )}
       </div>
 
       {/* Widget Toolbar */}

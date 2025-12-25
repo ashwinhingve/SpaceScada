@@ -3,7 +3,6 @@
 import { useEffect, useState } from 'react';
 import { MapContainer, TileLayer, Marker, Popup, Polyline } from 'react-leaflet';
 import { GPSLocation, GPSFixType } from '@webscada/shared-types';
-import 'leaflet/dist/leaflet.css';
 import L from 'leaflet';
 
 // Fix for default marker icons in Next.js

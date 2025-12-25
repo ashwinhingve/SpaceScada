@@ -11,6 +11,8 @@ import { ArrowLeft } from 'lucide-react';
 import { GISDashboard } from '@/components/gis/GISDashboard';
 
 export default function GISPage() {
+  const apiKey = process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY || '';
+
   return (
     <div className="h-[calc(100vh-4rem)]">
       {/* Breadcrumb */}
@@ -30,7 +32,7 @@ export default function GISPage() {
 
       {/* Full Screen GIS Dashboard */}
       <GISDashboard
-        apiKey={process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY || ''}
+        apiKey={apiKey}
         className="h-full"
       />
     </div>

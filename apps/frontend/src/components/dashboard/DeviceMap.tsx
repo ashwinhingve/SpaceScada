@@ -5,8 +5,6 @@ import { MapPin, Maximize2 } from 'lucide-react';
 import * as React from 'react';
 import { MapContainer, Marker, Popup, TileLayer, useMap } from 'react-leaflet';
 
-import 'leaflet/dist/leaflet.css';
-
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 
@@ -144,13 +142,12 @@ export function DeviceMap({
                     <p className="text-sm">
                       Status:{' '}
                       <span
-                        className={`font-medium ${
-                          device.status === 'connected'
+                        className={`font-medium ${device.status === 'connected'
                             ? 'text-green-500'
                             : device.status === 'disconnected'
                               ? 'text-red-500'
                               : 'text-yellow-500'
-                        }`}
+                          }`}
                       >
                         {device.status}
                       </span>

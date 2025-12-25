@@ -28,10 +28,22 @@ export function GISMap({ apiKey, layers, onMarkerClick, className = '' }: GISMap
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [isMapReadyForLayers, setIsMapReadyForLayers] = useState(false);
+  const [isMounted, setIsMounted] = useState(false);
+
+  // Track when component mounts
+  useEffect(() => {
+    setIsMounted(true);
+  }, []);
 
   // Initialize Google Maps
   useEffect(() => {
-    if (!mapRef.current || map) return;
+    if (!isMounted || !mapRef.current) {
+      return;
+    }
+
+    if (map) {
+      return;
+    }
 
     if (!apiKey) {
       setError('Google Maps API key is missing');
@@ -89,19 +101,17 @@ export function GISMap({ apiKey, layers, onMarkerClick, className = '' }: GISMap
             clearTimeout(timeoutId);
             setIsMapReadyForLayers(true);
             setIsLoading(false);
-            console.log('Google Maps loaded successfully');
           }
         };
 
         gmaps.event.addListenerOnce(mapInstance, 'idle', handleMapReady);
 
-        // Fallback: if 'idle' doesn't fire within 5 seconds, proceed anyway
+        // Fallback: if 'idle' doesn't fire within 2 seconds, proceed anyway
         timeoutId = setTimeout(() => {
           if (!idleHandled) {
-            console.warn('Map idle event timeout - proceeding anyway');
             handleMapReady();
           }
-        }, 5000);
+        }, 2000);
       })
       .catch((err) => {
         console.error('Error loading Google Maps:', err);
@@ -121,7 +131,7 @@ export function GISMap({ apiKey, layers, onMarkerClick, className = '' }: GISMap
       setDataLayers(new Map());
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [apiKey, mapRef]);
+  }, [apiKey, isMounted]);
 
   // Load and render one layer
   const loadLayer = useCallback(
@@ -159,14 +169,14 @@ export function GISMap({ apiKey, layers, onMarkerClick, className = '' }: GISMap
                   ${properties.name || 'Feature'}
                 </h3>
                 ${Object.entries(properties)
-                  .filter(([key]) => key !== 'name')
-                  .map(
-                    ([key, value]) =>
-                      `<div style="font-size: 12px; margin: 4px 0;">
+                .filter(([key]) => key !== 'name')
+                .map(
+                  ([key, value]) =>
+                    `<div style="font-size: 12px; margin: 4px 0;">
                         <strong>${key}:</strong> ${value}
                       </div>`
-                  )
-                  .join('')}
+                )
+                .join('')}
               </div>
             `,
             position: event.latLng,
@@ -236,31 +246,30 @@ export function GISMap({ apiKey, layers, onMarkerClick, className = '' }: GISMap
     });
   }, [map, isMapReadyForLayers, layers, dataLayers, textLabels]);
 
-  if (isLoading) {
-    return (
-      <div className={`flex items-center justify-center bg-gray-900 ${className}`}>
-        <div className="text-center">
-          <div className="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500"></div>
-          <p className="mt-4 text-gray-400">Loading Google Maps...</p>
-        </div>
-      </div>
-    );
-  }
-
-  if (error) {
-    return (
-      <div className={`flex items-center justify-center bg-gray-900 ${className}`}>
-        <div className="text-center">
-          <div className="text-red-500 text-xl mb-2">⚠️</div>
-          <p className="text-gray-400">{error}</p>
-        </div>
-      </div>
-    );
-  }
-
   return (
     <div className={`relative ${className}`}>
+      {/* Map Container - Always rendered so ref can attach */}
       <div ref={mapRef} className="w-full h-full" />
+
+      {/* Loading Overlay */}
+      {isLoading && (
+        <div className="absolute inset-0 flex items-center justify-center bg-gray-900 z-10">
+          <div className="text-center">
+            <div className="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500"></div>
+            <p className="mt-4 text-gray-400">Loading Google Maps...</p>
+          </div>
+        </div>
+      )}
+
+      {/* Error Overlay */}
+      {error && (
+        <div className="absolute inset-0 flex items-center justify-center bg-gray-900 z-10">
+          <div className="text-center">
+            <div className="text-red-500 text-xl mb-2">⚠️</div>
+            <p className="text-gray-400">{error}</p>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
